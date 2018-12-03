@@ -9,7 +9,7 @@ import pytoml as toml
 import pygit2
 from compare_locales.paths import TOMLParser
 from compare_locales import mozpath
-from compare_locales.merge import merge_channels
+from compare_locales.merge import merge_channels, MergeNotSupportedError
 import walker
 
 
@@ -44,7 +44,7 @@ class CommitsGraph:
             '-C', self.target.path, 
             'log', 
             '-n', '1', 
-            '--grep=Converted:', 
+            '--grep=X-Channel-Converted-Revision:',
             '--format=%H',
         ]
         last_converted = subprocess.run(
@@ -52,20 +52,22 @@ class CommitsGraph:
             stdout=subprocess.PIPE,
             encoding='ascii'
         ).stdout.strip()
+        if not last_converted:
+            last_converted = self.target.lookup_branch('master').target
         head = self.target[last_converted]
-        revs = {}
+        revs = defaultdict(set)
         for m in re.finditer(
-            '^(Converted: )?([^@\n]*?)@([a-f0-9]{40})$',
+            '^(X-Channel-(Converted-)?Revision: )([^@\n]*?)@([a-f0-9]{40})$',
             head.message,
             re.M
         ):
-            revs[m.group(2)] = m.group(3)
+            revs[m.group(3)].add(m.group(3))
         for repo in self.repos:
             n = '{org}/{name}'.format(**repo)
             if n in revs:
                 self.revs[n] = revs.pop(n)
         if revs:
-            assert false, 'Configuration dropped'
+            assert False, 'Configuration dropped'
 
     @property
     def roots(self):
@@ -79,7 +81,8 @@ class CommitsGraph:
         return roots
 
     def loadConfigs(self):
-        self.repos = toml.load(open('config.toml'))['repo']
+        config_path = os.path.join(self.target.workdir, 'config.toml')
+        self.repos = toml.load(open(config_path))['repo']
 
     def pull(self):
         for repo in self.repos:
@@ -98,7 +101,7 @@ class CommitsGraph:
     def gather_repo(self, repo):
         basepath = mozpath.join(repo['org'], repo['name'])
         pc = TOMLParser().parse(mozpath.join(basepath, 'l10n.toml'))
-        paths = [
+        paths = ['l10n.toml'] + [
             mozpath.relpath(
                 m['reference'].pattern.expand(m['reference'].env),
                 basepath
@@ -113,10 +116,10 @@ class CommitsGraph:
                 'log',
                 '--parents',
                 '--format=%H %ct %P']
-            oldparent = None
+            base_revisions = None
             if basepath in self.revs:
-                oldparent = self.revs[basepath]
-                cmd += ['^' + self.revs[basepath]]
+                base_revisions = self.revs[basepath]
+                cmd += ['^' + r for r in self.revs[basepath]]
             cmd += [
                 branch,
                 '--'
@@ -129,7 +132,7 @@ class CommitsGraph:
                 self.repos_for_hash[commit].append((basepath, branch))
                 self.commit_dates[commit] = max(commit_date, self.commit_dates.get(commit, 0))
                 for parent in segs:
-                    if parent == oldparent:
+                    if base_revisions and parent in base_revisions:
                         continue
                     self.parents[commit].add(parent)
                     self.children[parent].add(commit)
@@ -149,21 +152,29 @@ class EchoWalker(walker.GraphWalker):
     def handlerev(self, src_rev):
         basepath, branch = self.graph.repos_for_hash[src_rev][0]
         repo = self.repo(basepath)
-        self.revs[basepath] = src_rev
+        self.revs[basepath] = [src_rev]
         commitish = repo[src_rev]
-        message = commitish.message + '\nConverted: {}@{}\n'.format(basepath, src_rev)
+        message = (
+            commitish.message +
+            '\nX-Channel-Converted-Revision: {}@{}\n'.format(basepath, src_rev)
+        )
         contents = defaultdict(list)
-        for other_path, other_rev in self.revs.items():
+        for other_path, other_revs in self.revs.items():
             paths = self.graph.paths_for_repos[other_path]
             other_repo = self.repo(other_path)
-            other_commit = other_repo[other_rev]
-            for p in paths:
-                if p in other_commit.tree:
-                    target_path = mozpath.join(*mozpath.split(p)[-2:])
-                    contents[target_path].append(other_repo[other_commit.tree[p].id].data)
-            if other_path == basepath:
-                continue
-            message += '{}@{}\n'.format(other_path, other_rev)
+            for other_rev in other_revs:
+                other_commit = other_repo[other_rev]
+                for p in paths:
+                    if p in other_commit.tree:
+                        target_path = mozpath.join(other_path, p)
+                        contents[target_path].append(
+                            other_repo[other_commit.tree[p].id].data
+                        )
+                if other_path == basepath:
+                    continue
+                message += 'X-Channel-Revision: {}@{}\n'.format(
+                    other_path, other_rev
+                )
         self.createWorkdir(contents)
         self.graph.target.index.add_all()
         self.graph.target.index.write()
@@ -180,15 +191,19 @@ class EchoWalker(walker.GraphWalker):
             parents
         )
 
-
     def createWorkdir(self, contents):
         workdir = self.graph.target.workdir
         for entry in os.listdir(workdir):
             if entry[0] == '.':
                 continue
+            if entry == 'config.toml':
+                continue
             shutil.rmtree(mozpath.join(workdir, entry))
         for tpath, content_list in contents.items():
-            b_content = merge_channels(tpath, content_list)
+            try:
+                b_content = merge_channels(tpath, content_list)
+            except MergeNotSupportedError:
+                b_content = content_list[0]
             tpath = mozpath.join(workdir, tpath)
             tdir = mozpath.dirname(tpath)
             if not os.path.isdir(tdir):

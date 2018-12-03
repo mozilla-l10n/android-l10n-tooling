@@ -1,0 +1,33 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+
+
+HEADER = """\
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+"""
+
+TAIL = """\
+</resources>
+"""
+
+def cli():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('strings')
+    parser.add_argument('msgs', nargs='*', default=[])
+    args = parser.parse_args()
+    dir = os.path.dirname(args.strings)
+    if dir and not os.path.isdir(dir):
+        os.makedirs(dir)
+    with open(args.strings, 'w') as cf:
+        cf.write(HEADER)
+        for msg in sorted(args.msgs):
+            key, val = msg.split("=", 1)
+            cf.write("  <string name=\"{}\">{}</string>\n".format(key, val))
+        cf.write(TAIL)
+
+
+if __name__ == '__main__':
+    cli()
