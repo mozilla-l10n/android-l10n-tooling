@@ -1,5 +1,5 @@
 import argparse
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import os
 import re
 import shutil
@@ -57,11 +57,11 @@ class CommitsGraph:
         head = self.target[last_converted]
         revs = defaultdict(set)
         for m in re.finditer(
-            '^(X-Channel-(Converted-)?Revision: )([^@\n]*?)@([a-f0-9]{40})$',
+            '^X-Channel-(Converted-)?Revision: \[(.+?)\] ([^@\n]*?)@([a-f0-9]{40})$',
             head.message,
             re.M
         ):
-            revs[m.group(3)].add(m.group(3))
+            revs[m.group(3)].add(m.group(4))
         for repo in self.repos:
             n = '{org}/{name}'.format(**repo)
             if n in revs:
@@ -156,7 +156,7 @@ class EchoWalker(walker.GraphWalker):
         commitish = repo[src_rev]
         message = (
             commitish.message +
-            '\nX-Channel-Converted-Revision: {}@{}\n'.format(basepath, src_rev)
+            '\nX-Channel-Converted-Revision: [{}] {}@{}\n'.format(branch, basepath, src_rev)
         )
         contents = defaultdict(list)
         for other_path, other_revs in self.revs.items():
@@ -172,7 +172,8 @@ class EchoWalker(walker.GraphWalker):
                         )
                 if other_path == basepath:
                     continue
-                message += 'X-Channel-Revision: {}@{}\n'.format(
+                message += 'X-Channel-Revision: [{}] {}@{}\n'.format(
+                    'master',
                     other_path, other_rev
                 )
         self.createWorkdir(contents)
