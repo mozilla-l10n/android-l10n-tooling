@@ -68,3 +68,39 @@ Validate new results
   69ab3c00e0258372f46da0ec3e4426d9b733ae93 c2
   X-Channel-Converted-Revision: [master] gh1/android1@3f2cc03f88ccec09e1e2c57a1b785753fa382a57
   
+  $ cd ..
+
+Create quarantine
+  $ cd target
+  $ git checkout -b quarantine
+  Switched to a new branch 'quarantine'
+  $ cd ..
+
+Add more content to convert
+  $ cd gh1/android1
+  $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml \
+  > action_cancel=Cancel \
+  > action_ok=OK \
+  > action_submit=Submit
+  $ git commit -qam'c3'
+  $ git log -n1 --format='%H'
+  45a2654fdb8e62b504eb63cea8d26125028e2c09
+  $ cd ../..
+
+Convert to target
+  $ python -mprocess --branch=quarantine target
+
+Validate new results
+  $ cd target
+  $ git log  --format='%H %s%n%b' ^69ab3c00e0258372f46da0ec3e4426d9b733ae93 quarantine
+  92799739ffb1140d899d50eb2ba3bb440625f27c c3
+  X-Channel-Converted-Revision: [master] gh1/android1@45a2654fdb8e62b504eb63cea8d26125028e2c09
+  
+Merge quarantine
+  $ git checkout -q master
+  $ git merge -q quarantine
+  $ git checkout -q quarantine
+  $ git branch -v
+    master     9279973 c3
+  * quarantine 9279973 c3
+  $ cd ..

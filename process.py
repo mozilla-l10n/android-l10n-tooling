@@ -13,8 +13,8 @@ from compare_locales.merge import merge_channels, MergeNotSupportedError
 import walker
 
 
-def handle(target, pull=False):
-    graph = CommitsGraph(target)
+def handle(target, target_branch, pull=False):
+    graph = CommitsGraph(target, target_branch)
     graph.loadConfigs()
     graph.loadRevs()
     if pull:
@@ -25,7 +25,7 @@ def handle(target, pull=False):
 
 class CommitsGraph:
 
-    def __init__(self, target):
+    def __init__(self, target, branch):
         self.config = None
         self.repos = None
         self.repos_for_hash = defaultdict(list)
@@ -34,6 +34,7 @@ class CommitsGraph:
         self.parents = defaultdict(set)
         self.children = defaultdict(set)
         self.target = pygit2.Repository(target)
+        self.target_branch = branch
         self.revs = {}
 
     def loadRevs(self):
@@ -46,6 +47,7 @@ class CommitsGraph:
             '-n', '1', 
             '--grep=X-Channel-Converted-Revision:',
             '--format=%H',
+            self.target_branch
         ]
         last_converted = subprocess.run(
             cmd,
@@ -53,7 +55,7 @@ class CommitsGraph:
             encoding='ascii'
         ).stdout.strip()
         if not last_converted:
-            last_converted = self.target.lookup_branch('master').target
+            last_converted = self.target.lookup_branch(self.target_branch).target
         head = self.target[last_converted]
         revs = defaultdict(set)
         for m in re.finditer(
@@ -139,10 +141,11 @@ class CommitsGraph:
 
 
 class EchoWalker(walker.GraphWalker):
-    def __init__(self, graph):
+    def __init__(self, graph, branch):
         super(EchoWalker, self).__init__(graph)
         self._repos = {}
         self.revs = graph.revs.copy()
+        self.target_branch = branch
 
     def repo(self, path):
         if path not in self._repos:
@@ -184,7 +187,7 @@ class EchoWalker(walker.GraphWalker):
         if not self.graph.target.is_empty:
             parents.append(self.graph.target.head.target)
         self.graph.target.create_commit(
-            'refs/heads/master',
+            'refs/heads/' + self.target_branch,
             commitish.author,
             commitish.committer,
             message,
@@ -217,7 +220,8 @@ if __name__=='__main__':
     p = argparse.ArgumentParser()
     p.add_argument('--pull', action="store_true")
     p.add_argument('target')
+    p.add_argument('--branch', default="master")
     args = p.parse_args()
-    graph = handle(args.target, pull=args.pull)
-    echo = EchoWalker(graph)
+    graph = handle(args.target, args.branch, pull=args.pull)
+    echo = EchoWalker(graph, args.branch)
     echo.walkGraph()
