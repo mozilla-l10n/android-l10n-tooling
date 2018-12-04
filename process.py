@@ -30,6 +30,7 @@ class CommitsGraph:
         self.repos = None
         self.repos_for_hash = defaultdict(list)
         self.paths_for_repos = {}
+        self.branches = {}
         self.commit_dates = {}
         self.parents = defaultdict(set)
         self.children = defaultdict(set)
@@ -139,6 +140,7 @@ class CommitsGraph:
             for m in pc.paths
         ]
         self.paths_for_repos[basepath] = paths
+        self.branches[basepath] = repo['branches'][:]
         for branch in repo['branches']:
             cmd = [
                 'git',
@@ -198,7 +200,11 @@ class EchoWalker(walker.GraphWalker):
         for other_path, other_revs in self.revs.items():
             paths = self.graph.paths_for_repos[other_path]
             other_repo = self.repo(other_path)
-            for other_branch, other_rev in other_revs.items():
+            other_branches = self.graph.branches[other_path]
+            for other_branch in other_branches:
+                if other_branch not in other_revs:
+                    continue
+                other_rev = other_revs[other_branch]
                 other_commit = other_repo[other_rev]
                 for p in paths:
                     if p in other_commit.tree:
