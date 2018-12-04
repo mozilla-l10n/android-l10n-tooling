@@ -19,8 +19,8 @@ Base target repository with a configuration for a single upstream repo
   $ cd ..
 
 Create upstream repo, with a single commit for a l10n.toml and a strings.xml
-  $ mkdir gh1
-  $ cd gh1
+  $ mkdir -p upstream/gh1
+  $ cd upstream/gh1
   $ git init -q android1
   $ cd android1
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml action_cancel=Cancel
@@ -32,10 +32,14 @@ Create upstream repo, with a single commit for a l10n.toml and a strings.xml
   0% of entries changed
   $ git add .
   $ git commit -qm'c0'
-  $ cd ../..
+  $ cd ../../..
+  $ mkdir gh1
+  $ cd gh1
+  $ git clone -q ../upstream/gh1/android1
+  $ cd ..
 
 Convert to target
-  $ python -mprocess target
+  $ python -mprocess --pull target
 
 Validate some of the results
   $ cd target
@@ -44,10 +48,10 @@ Validate some of the results
   X-Channel-Converted-Revision: [master] gh1/android1@28f8ea05feac63c5f3836603297a3bc9f3e2d544
   
   $ cd ..
-  $ diff -q -x .git -r gh1/android1 target/gh1/android1
+  $ diff -q -x .git -r upstream/gh1/android1 target/gh1/android1
 
 Add more content to upstream
-  $ cd gh1/android1
+  $ cd upstream/gh1/android1
   $ cat > README.md << EOF
   > This is just a file
   > EOF
@@ -59,10 +63,10 @@ Add more content to upstream
   $ git commit -qam'c2'
   $ git log -n1 --format='%H'
   3f2cc03f88ccec09e1e2c57a1b785753fa382a57
-  $ cd ../..
+  $ cd ../../..
 
 Convert to target
-  $ python -mprocess target
+  $ python -mprocess --pull target
 
 Validate new results
   $ cd target
@@ -79,7 +83,7 @@ Create quarantine
   $ cd ..
 
 Add more content to convert
-  $ cd gh1/android1
+  $ cd upstream/gh1/android1
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml \
   > action_cancel=Cancel \
   > action_ok=OK \
@@ -87,10 +91,10 @@ Add more content to convert
   $ git commit -qam'c3'
   $ git log -n1 --format='%H'
   45a2654fdb8e62b504eb63cea8d26125028e2c09
-  $ cd ../..
+  $ cd ../../..
 
 Convert to target
-  $ python -mprocess --branch=quarantine target
+  $ python -mprocess --pull --branch=quarantine target
 
 Validate new results
   $ cd target
@@ -108,7 +112,7 @@ Merge quarantine
   $ cd ..
 
 Add a release fork
-  $ cd gh1/android1
+  $ cd upstream/gh1/android1
   $ git checkout -qb release 3f2cc03f88ccec09e1e2c57a1b785753fa382a57
   $ git checkout -q master
 Modify development branch
@@ -122,7 +126,7 @@ Modify development branch
   $ git branch -v
   * master  d676c69 c4
     release 3f2cc03 c2
-  $ cd ../..
+  $ cd ../../..
 
 Add release branch to config
   $ cd target
@@ -139,7 +143,7 @@ Add release branch to config
   $ cd ..
 
 Convert to target
-  $ python -mprocess --branch=quarantine target
+  $ python -mprocess --pull --branch=quarantine target
 
 Validate new results
   $ cd target
@@ -150,3 +154,23 @@ Validate new results
   
   9e4c15747fecea0f9ad377e75f407ca783cf71fc Add release
   
+  $ cd ..
+
+Recreate target repo in batch
+  $ git init -q batched-target
+  $ cp target/config.toml batched-target/config.toml
+  $ cd batched-target
+  $ git add config.toml
+  $ git commit -qm'Initial config'
+  $ git log --format='%H %s%n%b'
+  f9f62493b7c3550e514bdf0baed5b7eb8457f301 Initial config
+  
+  $ cd ..
+
+#Batch convert to new target
+#  $ python -mprocess batched-target
+#
+#Validate batched results
+#  $ diff -x .git -qr target batched-target
+#  $ cd batched-target
+#  $ git log --format='%H %s%n%b'

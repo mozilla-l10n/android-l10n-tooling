@@ -16,9 +16,9 @@ import walker
 def handle(target, target_branch, pull=False):
     graph = CommitsGraph(target, target_branch)
     graph.loadConfigs()
-    graph.loadRevs()
     if pull:
         graph.pull()
+    graph.loadRevs()
     graph.gather()
     return graph
 
@@ -85,8 +85,11 @@ class CommitsGraph:
                     'git',
                     '-C', repo_name,
                     'merge-base',
-                    branch
-                ] + repo['branches'][:n]
+                    'origin/' + branch
+                ] + [
+                    'origin/' + b
+                    for b in repo['branches'][:n]
+                ]
                 branch_rev = subprocess.run(
                     cmd,
                     stdout=subprocess.PIPE,
@@ -116,7 +119,8 @@ class CommitsGraph:
             cmd = [
                 'git',
                 '-C', basepath,
-                'pull'
+                'pull',
+                '-q',
             ]
             subprocess.run(cmd)
 
@@ -147,7 +151,7 @@ class CommitsGraph:
                 base_revisions = self.revs[basepath].values()
                 cmd += ['^' + r for r in base_revisions]
             cmd += [
-                branch,
+                'origin/' + branch,
                 '--'
             ] + paths
             out = subprocess.run(cmd, stdout=subprocess.PIPE, encoding='ascii').stdout
@@ -175,6 +179,9 @@ class EchoWalker(walker.GraphWalker):
 
     def repo(self, path):
         if path not in self._repos:
+            if not os.path.isdir(path):
+                # try bare repo
+                path += '.git'
             self._repos[path] = pygit2.Repository(path)
         return self._repos[path]
 
