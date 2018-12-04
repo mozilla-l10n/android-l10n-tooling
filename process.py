@@ -57,19 +57,43 @@ class CommitsGraph:
         if not last_converted:
             last_converted = self.target.lookup_branch(self.target_branch).target
         head = self.target[last_converted]
-        revs = defaultdict(set)
+        revs = defaultdict(dict)
         for m in re.finditer(
-            '^X-Channel-(Converted-)?Revision: \[(.+?)\] ([^@\n]*?)@([a-f0-9]{40})$',
+            '^X-Channel-(?:Converted-)?Revision: '
+            '\[(?P<branch>.+?)\] (?P<repo>[^@\n]*?)@(?P<rev>[a-f0-9]{40})$',
             head.message,
             re.M
         ):
-            revs[m.group(3)].add(m.group(4))
+            revs[m.group('repo')][m.group('branch')] = m.group('rev')
         for repo in self.repos:
-            n = '{org}/{name}'.format(**repo)
-            if n in revs:
-                self.revs[n] = revs.pop(n)
-        if revs:
-            assert False, 'Configuration dropped'
+            repo_name = '{org}/{name}'.format(**repo)
+            if repo_name not in revs:
+                continue
+            self.revs[repo_name] = OrderedDict()
+            for n, branch in enumerate(repo['branches']):
+                if branch in revs[repo_name]:
+                    self.revs[repo_name][branch] = revs[repo_name][branch]
+                    continue
+                # Find branch point against earlier branches
+                # This assumes that forks and releases come after
+                # their development branches. Aka, `master` should be the
+                # first branch in `config.toml`.
+                if n == 0:
+                    # first branch, nothing to check against
+                    continue
+                cmd = [
+                    'git',
+                    '-C', repo_name,
+                    'merge-base',
+                    branch
+                ] + repo['branches'][:n]
+                branch_rev = subprocess.run(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    encoding='ascii'
+                ).stdout.strip()
+                if branch_rev:
+                    self.revs[repo_name][branch] = branch_rev
 
     @property
     def roots(self):
@@ -120,8 +144,8 @@ class CommitsGraph:
                 '--format=%H %ct %P']
             base_revisions = None
             if basepath in self.revs:
-                base_revisions = self.revs[basepath]
-                cmd += ['^' + r for r in self.revs[basepath]]
+                base_revisions = self.revs[basepath].values()
+                cmd += ['^' + r for r in base_revisions]
             cmd += [
                 branch,
                 '--'
@@ -144,7 +168,9 @@ class EchoWalker(walker.GraphWalker):
     def __init__(self, graph, branch):
         super(EchoWalker, self).__init__(graph)
         self._repos = {}
-        self.revs = graph.revs.copy()
+        self.revs = defaultdict(dict)
+        for repo_name, revs in graph.revs.items():
+            self.revs[repo_name] = revs.copy()
         self.target_branch = branch
 
     def repo(self, path):
@@ -155,17 +181,17 @@ class EchoWalker(walker.GraphWalker):
     def handlerev(self, src_rev):
         basepath, branch = self.graph.repos_for_hash[src_rev][0]
         repo = self.repo(basepath)
-        self.revs[basepath] = [src_rev]
+        self.revs[basepath][branch] = src_rev
         commitish = repo[src_rev]
         message = (
             commitish.message +
-            '\nX-Channel-Converted-Revision: [{}] {}@{}\n'.format(branch, basepath, src_rev)
+            '\n'
         )
         contents = defaultdict(list)
         for other_path, other_revs in self.revs.items():
             paths = self.graph.paths_for_repos[other_path]
             other_repo = self.repo(other_path)
-            for other_rev in other_revs:
+            for other_branch, other_rev in other_revs.items():
                 other_commit = other_repo[other_rev]
                 for p in paths:
                     if p in other_commit.tree:
@@ -173,10 +199,9 @@ class EchoWalker(walker.GraphWalker):
                         contents[target_path].append(
                             other_repo[other_commit.tree[p].id].data
                         )
-                if other_path == basepath:
-                    continue
-                message += 'X-Channel-Revision: [{}] {}@{}\n'.format(
-                    'master',
+                message += 'X-Channel{}-Revision: [{}] {}@{}\n'.format(
+                    '-Converted' if other_path == basepath and other_branch == branch else "",
+                    other_branch,
                     other_path, other_rev
                 )
         self.createWorkdir(contents)

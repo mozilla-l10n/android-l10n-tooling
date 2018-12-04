@@ -57,6 +57,8 @@ Add more content to upstream
   > action_cancel=Cancel \
   > action_ok=OK
   $ git commit -qam'c2'
+  $ git log -n1 --format='%H'
+  3f2cc03f88ccec09e1e2c57a1b785753fa382a57
   $ cd ../..
 
 Convert to target
@@ -104,3 +106,47 @@ Merge quarantine
     master     9279973 c3
   * quarantine 9279973 c3
   $ cd ..
+
+Add a release fork
+  $ cd gh1/android1
+  $ git checkout -qb release 3f2cc03f88ccec09e1e2c57a1b785753fa382a57
+  $ git checkout -q master
+Modify development branch
+  $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml \
+  > action_cancel=Cancel \
+  > "action_submit=Submit it" \
+  > action_other=Other
+  $ git commit -qam'c4'
+  $ git log -n1 --format='%H'
+  d676c69ed791624b06c5cc0f510c5204dbc0d9e0
+  $ git branch -v
+  * master  d676c69 c4
+    release 3f2cc03 c2
+  $ cd ../..
+
+Add release branch to config
+  $ cd target
+  $ cat > config.toml << EOF
+  > [[repo]]
+  > org = "gh1"
+  > name = "android1"
+  > branches = [
+  >     "master",
+  >     "release",
+  > ]
+  > EOF
+  $ git commit -qam'Add release'
+  $ cd ..
+
+Convert to target
+  $ python -mprocess --branch=quarantine target
+
+Validate new results
+  $ cd target
+  $ git log  --format='%H %s%n%b' ^92799739ffb1140d899d50eb2ba3bb440625f27c quarantine
+  97af06b7126a9ea307f2576ac27de5bf8bb13bd9 c4
+  X-Channel-Converted-Revision: [master] gh1/android1@d676c69ed791624b06c5cc0f510c5204dbc0d9e0
+  X-Channel-Revision: [release] gh1/android1@3f2cc03f88ccec09e1e2c57a1b785753fa382a57
+  
+  9e4c15747fecea0f9ad377e75f407ca783cf71fc Add release
+  
