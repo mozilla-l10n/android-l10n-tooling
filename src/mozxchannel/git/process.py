@@ -24,7 +24,6 @@ def handle(target, target_branch, pull=False):
 
 
 class CommitsGraph:
-
     def __init__(self, target, branch):
         self.config = None
         self.repos = None
@@ -43,36 +42,37 @@ class CommitsGraph:
         if self.target.is_empty:
             return
         cmd = [
-            'git',
-            '-C', self.target.path, 
-            'log', 
-            '-n', '1', 
-            '--grep=X-Channel-Converted-Revision:',
-            '--format=%H',
-            self.target_branch
+            "git",
+            "-C",
+            self.target.path,
+            "log",
+            "-n",
+            "1",
+            "--grep=X-Channel-Converted-Revision:",
+            "--format=%H",
+            self.target_branch,
         ]
         last_converted = subprocess.run(
-            cmd,
-            stdout=subprocess.PIPE,
-            encoding='ascii'
+            cmd, stdout=subprocess.PIPE, encoding="ascii"
         ).stdout.strip()
         if not last_converted:
-            last_converted = self.target.lookup_branch(self.target_branch).target
+            last_converted = \
+                self.target.lookup_branch(self.target_branch).target
         head = self.target[last_converted]
         revs = defaultdict(dict)
         for m in re.finditer(
-            '^X-Channel-(?:Converted-)?Revision: '
-            '\[(?P<branch>.+?)\] (?P<repo>[^@\n]*?)@(?P<rev>[a-f0-9]{40})$',
+            "^X-Channel-(?:Converted-)?Revision: "
+            "\[(?P<branch>.+?)\] (?P<repo>[^@\n]*?)@(?P<rev>[a-f0-9]{40})$",
             head.message,
-            re.M
+            re.M,
         ):
-            revs[m.group('repo')][m.group('branch')] = m.group('rev')
+            revs[m.group("repo")][m.group("branch")] = m.group("rev")
         for repo in self.repos:
-            repo_name = '{org}/{name}'.format(**repo)
+            repo_name = "{org}/{name}".format(**repo)
             self.revs[repo_name] = {}
             if repo_name not in revs:
                 continue
-            for n, branch in enumerate(repo['branches']):
+            for n, branch in enumerate(repo["branches"]):
                 if branch in revs[repo_name]:
                     self.revs[repo_name][branch] = revs[repo_name][branch]
 
@@ -88,18 +88,13 @@ class CommitsGraph:
         return roots
 
     def loadConfigs(self):
-        config_path = os.path.join(self.target.workdir, 'config.toml')
-        self.repos = toml.load(open(config_path))['repo']
+        config_path = os.path.join(self.target.workdir, "config.toml")
+        self.repos = toml.load(open(config_path))["repo"]
 
     def pull(self):
         for repo in self.repos:
-            basepath = mozpath.join(repo['org'], repo['name'])
-            cmd = [
-                'git',
-                '-C', basepath,
-                'pull',
-                '-q',
-            ]
+            basepath = mozpath.join(repo["org"], repo["name"])
+            cmd = ["git", "-C", basepath, "pull", "-q"]
             subprocess.run(cmd)
 
     def gather(self):
@@ -107,42 +102,45 @@ class CommitsGraph:
             self.gather_repo(repo)
 
     def gather_repo(self, repo):
-        basepath = mozpath.join(repo['org'], repo['name'])
-        pc = TOMLParser().parse(mozpath.join(basepath, 'l10n.toml'))
-        paths = ['l10n.toml'] + [
+        basepath = mozpath.join(repo["org"], repo["name"])
+        pc = TOMLParser().parse(mozpath.join(basepath, "l10n.toml"))
+        paths = ["l10n.toml"] + [
             mozpath.relpath(
-                m['reference'].pattern.expand(m['reference'].env),
+                m["reference"].pattern.expand(m["reference"].env),
                 basepath
             )
             for m in pc.paths
         ]
         self.paths_for_repos[basepath] = paths
-        branches = repo['branches']
+        branches = repo["branches"]
         self.branches[basepath] = branches[:]
         known_revs = self.revs.get(basepath, {})
         for branch_num in range(len(branches)):
             branch = branches[branch_num]
             prior_branches = branches[:branch_num]
             cmd = [
-                'git',
-                '-C', basepath,
-                'log',
-                '--parents',
-                '--format=%H %ct %P']
-            cmd += ['^' + b for b in prior_branches]
+                "git", "-C", basepath,
+                "log",
+                "--parents",
+                "--format=%H %ct %P"
+            ] + [
+                "^" + b for b in prior_branches
+            ]
             if branch in known_revs:
-                cmd += ['^' + known_revs[branch]]
-            cmd += [
-                'origin/' + branch,
-                '--'
-            ] + paths
-            out = subprocess.run(cmd, stdout=subprocess.PIPE, encoding='ascii').stdout
+                cmd += ["^" + known_revs[branch]]
+            cmd += ["origin/" + branch, "--"] + paths
+            out = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE, encoding="ascii"
+            ).stdout
             for commit_line in out.splitlines():
                 segs = commit_line.split()
                 commit = segs.pop(0)
                 commit_date = int(segs.pop(0))
                 self.repos_for_hash[commit].append((basepath, branch))
-                self.commit_dates[commit] = max(commit_date, self.commit_dates.get(commit, 0))
+                self.commit_dates[commit] = max(
+                    commit_date, self.commit_dates.get(commit, 0)
+                )
                 for parent in segs:
                     self.parents[commit].add(parent)
                     self.children[parent].add(commit)
@@ -152,31 +150,31 @@ class CommitsGraph:
             # Find the branch point to the previous branches.
             for prior_branch in prior_branches:
                 cmd = [
-                    'git',
-                    '-C', basepath,
-                    'merge-base',
-                    'origin/' + branch,
-                    'origin/' + prior_branch
+                    "git",
+                    "-C",
+                    basepath,
+                    "merge-base",
+                    "origin/" + branch,
+                    "origin/" + prior_branch,
                 ]
                 branch_rev = subprocess.run(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    encoding='ascii'
+                    cmd, stdout=subprocess.PIPE, encoding="ascii"
                 ).stdout.strip()
                 if not branch_rev:
                     continue
                 # We have a branch revision, find the next child on the
                 # route to the prior branch to add that to.
                 cmd = [
-                    'git',
-                    '-C', basepath,
-                    'rev-list', '-n', '1',
-                    '{}..origin/{}'.format(branch_rev, prior_branch)
+                    "git",
+                    "-C",
+                    basepath,
+                    "rev-list",
+                    "-n",
+                    "1",
+                    "{}..origin/{}".format(branch_rev, prior_branch),
                 ]
                 fork_rev = subprocess.run(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    encoding='ascii'
+                    cmd, stdout=subprocess.PIPE, encoding="ascii"
                 ).stdout.strip()
                 if fork_rev:
                     self.forks[fork_rev].append((basepath, branch, branch_rev))
@@ -213,10 +211,7 @@ class EchoWalker(walker.GraphWalker):
                 if fork_branch not in self.revs[fork_repo]:
                     self.revs[fork_repo][fork_branch] = fork_rev
         commitish = repo[src_rev]
-        message = (
-            commitish.message +
-            '\n'
-        )
+        message = commitish.message + "\n"
         contents = defaultdict(list)
         for other_path, other_revs in self.revs.items():
             paths = self.graph.paths_for_repos[other_path]
@@ -233,10 +228,13 @@ class EchoWalker(walker.GraphWalker):
                         contents[target_path].append(
                             other_repo[other_commit.tree[p].id].data
                         )
-                message += 'X-Channel{}-Revision: [{}] {}@{}\n'.format(
-                    '-Converted' if other_path == basepath and other_branch == branch else "",
+                message += "X-Channel{}-Revision: [{}] {}@{}\n".format(
+                    "-Converted"
+                    if other_path == basepath and other_branch == branch
+                    else "",
                     other_branch,
-                    other_path, other_rev
+                    other_path,
+                    other_rev,
                 )
         self.createWorkdir(contents)
         self.graph.target.index.add_all()
@@ -246,20 +244,20 @@ class EchoWalker(walker.GraphWalker):
         if not self.graph.target.is_empty:
             parents.append(self.graph.target.head.target)
         self.graph.target.create_commit(
-            'refs/heads/' + self.target_branch,
+            "refs/heads/" + self.target_branch,
             commitish.author,
             commitish.committer,
             message,
             tree_id,
-            parents
+            parents,
         )
 
     def createWorkdir(self, contents):
         workdir = self.graph.target.workdir
         for entry in os.listdir(workdir):
-            if entry[0] == '.':
+            if entry[0] == ".":
                 continue
-            if entry == 'config.toml':
+            if entry == "config.toml":
                 continue
             shutil.rmtree(mozpath.join(workdir, entry))
         for tpath, content_list in contents.items():
@@ -271,15 +269,15 @@ class EchoWalker(walker.GraphWalker):
             tdir = mozpath.dirname(tpath)
             if not os.path.isdir(tdir):
                 os.makedirs(tdir)
-            with open(tpath, 'wb') as fh:
+            with open(tpath, "wb") as fh:
                 fh.write(b_content)
 
 
-if __name__=='__main__':
+if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument('--pull', action="store_true")
-    p.add_argument('target')
-    p.add_argument('--branch', default="master")
+    p.add_argument("--pull", action="store_true")
+    p.add_argument("target")
+    p.add_argument("--branch", default="master")
     args = p.parse_args()
     graph = handle(args.target, args.branch, pull=args.pull)
     echo = EchoWalker(graph, args.branch)
