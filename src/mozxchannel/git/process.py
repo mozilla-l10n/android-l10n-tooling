@@ -1,5 +1,5 @@
 import argparse
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 import os
 import re
 import shutil
@@ -69,36 +69,12 @@ class CommitsGraph:
             revs[m.group('repo')][m.group('branch')] = m.group('rev')
         for repo in self.repos:
             repo_name = '{org}/{name}'.format(**repo)
-            self.revs[repo_name] = OrderedDict()
+            self.revs[repo_name] = {}
             if repo_name not in revs:
                 continue
             for n, branch in enumerate(repo['branches']):
                 if branch in revs[repo_name]:
                     self.revs[repo_name][branch] = revs[repo_name][branch]
-                    continue
-                # Find branch point against earlier branches
-                # This assumes that forks and releases come after
-                # their development branches. Aka, `master` should be the
-                # first branch in `config.toml`.
-                if n == 0:
-                    # first branch, nothing to check against
-                    continue
-                cmd = [
-                    'git',
-                    '-C', repo_name,
-                    'merge-base',
-                    'origin/' + branch
-                ] + [
-                    'origin/' + b
-                    for b in repo['branches'][:n]
-                ]
-                branch_rev = subprocess.run(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    encoding='ascii'
-                ).stdout.strip()
-                if branch_rev:
-                    self.revs[repo_name][branch] = branch_rev
 
     @property
     def roots(self):
@@ -225,9 +201,6 @@ class EchoWalker(walker.GraphWalker):
 
     def repo(self, path):
         if path not in self._repos:
-            if not os.path.isdir(path):
-                # try bare repo
-                path += '.git'
             self._repos[path] = pygit2.Repository(path)
         return self._repos[path]
 
