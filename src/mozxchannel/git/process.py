@@ -2,15 +2,17 @@ import argparse
 from collections import defaultdict
 import os
 import re
-import shutil
 import subprocess
 
 import pytoml as toml
-import pygit2
 from compare_locales.paths import TOMLParser
 from compare_locales import mozpath
 from compare_locales.merge import merge_channels, MergeNotSupportedError
 from mozxchannel import walker
+from mozxchannel.git.repository import (
+    Repository,
+    SourceRepository,
+)
 
 
 def handle(target, target_branch, pull=False):
@@ -34,7 +36,7 @@ class CommitsGraph:
         self.forks = defaultdict(list)
         self.parents = defaultdict(set)
         self.children = defaultdict(set)
-        self.target = pygit2.Repository(target)
+        self.target = Repository(target).git
         self.target_branch = branch
         self.revs = {}
 
@@ -68,11 +70,11 @@ class CommitsGraph:
         ):
             revs[m.group("repo")][m.group("branch")] = m.group("rev")
         for repo in self.repos:
-            repo_name = "{org}/{name}".format(**repo)
+            repo_name = repo.name
             self.revs[repo_name] = {}
             if repo_name not in revs:
                 continue
-            for n, branch in enumerate(repo["branches"]):
+            for n, branch in enumerate(repo.branches):
                 if branch in revs[repo_name]:
                     self.revs[repo_name][branch] = revs[repo_name][branch]
 
@@ -89,20 +91,22 @@ class CommitsGraph:
 
     def loadConfigs(self):
         config_path = os.path.join(self.target.workdir, "config.toml")
-        self.repos = toml.load(open(config_path))["repo"]
+        repo_configs = toml.load(open(config_path))["repo"]
+        self.repos = [
+            SourceRepository(config)
+            for config in repo_configs
+        ]
 
     def pull(self):
         for repo in self.repos:
-            basepath = mozpath.join(repo["org"], repo["name"])
-            cmd = ["git", "-C", basepath, "pull", "-q"]
-            subprocess.run(cmd)
+            repo.pull()
 
     def gather(self):
         for repo in self.repos:
             self.gather_repo(repo)
 
     def gather_repo(self, repo):
-        basepath = mozpath.join(repo["org"], repo["name"])
+        basepath = repo.path
         pc = TOMLParser().parse(mozpath.join(basepath, "l10n.toml"))
         paths = ["l10n.toml"] + [
             mozpath.relpath(
@@ -112,7 +116,7 @@ class CommitsGraph:
             for m in pc.paths
         ]
         self.paths_for_repos[basepath] = paths
-        branches = repo["branches"]
+        branches = repo.branches
         self.branches[basepath] = branches[:]
         known_revs = self.revs.get(basepath, {})
         for branch_num in range(len(branches)):
@@ -191,16 +195,15 @@ class CommitsGraph:
 class EchoWalker(walker.GraphWalker):
     def __init__(self, graph, branch):
         super(EchoWalker, self).__init__(graph)
-        self._repos = {}
         self.revs = defaultdict(dict)
         for repo_name, revs in graph.revs.items():
             self.revs[repo_name] = revs.copy()
         self.target_branch = branch
 
-    def repo(self, path):
-        if path not in self._repos:
-            self._repos[path] = pygit2.Repository(path)
-        return self._repos[path]
+    def repo(self, name):
+        for repo in self.graph.repos:
+            if repo.name == name:
+                return repo
 
     def handlerev(self, src_rev):
         basepath, branch = self.graph.repos_for_hash[src_rev][0]
@@ -224,7 +227,7 @@ class EchoWalker(walker.GraphWalker):
                 other_commit = other_repo[other_rev]
                 for p in paths:
                     if p in other_commit.tree:
-                        target_path = mozpath.join(other_path, p)
+                        target_path = mozpath.join(other_repo.target_root, p)
                         contents[target_path].append(
                             other_repo[other_commit.tree[p].id].data
                         )
