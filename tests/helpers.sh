@@ -7,3 +7,8 @@ export GIT_COMMITTER_DATE='Thu Jan 1 00:00:00 1970 +0000'
 
 export PYTHONPATH=$TESTDIR/../src
 export PYTHONDONTWRITEBYTECODE=x
+
+PREVIOUS_TARGET_REV=
+function target_rev() {
+    PREVIOUS_TARGET_REV=`git log -n 1 --format="^%H"`;
+}

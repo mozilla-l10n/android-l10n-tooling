@@ -16,6 +16,7 @@ Base target repository with a configuration for a single upstream repo
   $ git log  --format='%H %s%n%b'
   d2b396073ea22d136cb636797a4bce9e02936681 Initial config
   
+  $ target_rev
   $ cd ..
 
 Create upstream repo, with a single commit for a l10n.toml and a strings.xml
@@ -43,10 +44,11 @@ Convert to target
 
 Validate some of the results
   $ cd target
-  $ git log  --format='%H %s%n%b' ^d2b396073ea22d136cb636797a4bce9e02936681 master
+  $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
   b499c97f447e5d6cb34603ce39ed25f034277c9a c0
   X-Channel-Converted-Revision: [master] gh1/android1@24ffe06b96b32d762df8262876b1d27da2a22c65
   
+  $ target_rev
   $ cd ..
   $ diff -q -x .git -r upstream/gh1/android1 target/gh1/android1
 
@@ -70,10 +72,11 @@ Convert to target
 
 Validate new results
   $ cd target
-  $ git log  --format='%H %s%n%b' ^b499c97f447e5d6cb34603ce39ed25f034277c9a master
+  $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
   c7d96cce553fcf9517e36d1de86234c1d61304b8 c2
   X-Channel-Converted-Revision: [master] gh1/android1@e0fbb23763b49c6150238edc090eb1fd1fea9d49
   
+  $ target_rev
   $ cd ..
 
 Create quarantine
@@ -98,10 +101,12 @@ Convert to target
 
 Validate new results
   $ cd target
-  $ git log  --format='%H %s%n%b' ^c7d96cce553fcf9517e36d1de86234c1d61304b8 quarantine
+  $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV quarantine
   a9eb77950f49e826c4c4b71d4fa5268e0d6cc8b7 c3
   X-Channel-Converted-Revision: [master] gh1/android1@407a7be1aa9baf68ab30e122f4b08c78cf1eafba
   
+  $ target_rev
+
 Merge quarantine
   $ git checkout -q master
   $ git merge -q quarantine
@@ -147,7 +152,7 @@ Convert to target
 
 Validate new results
   $ cd target
-  $ git log  --format='%H %s%n%b' ^a9eb77950f49e826c4c4b71d4fa5268e0d6cc8b7 quarantine
+  $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV quarantine
   db72d42fbcc6103bbbde63567082fdc1f0412408 c4
   X-Channel-Converted-Revision: [master] gh1/android1@487a9c4cf79c2dddc2064515c1103e02d00edac6
   X-Channel-Revision: [release] gh1/android1@e0fbb23763b49c6150238edc090eb1fd1fea9d49
