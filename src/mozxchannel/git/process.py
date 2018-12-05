@@ -32,6 +32,7 @@ class CommitsGraph:
         self.paths_for_repos = {}
         self.branches = {}
         self.commit_dates = {}
+        self.forks = defaultdict(list)
         self.parents = defaultdict(set)
         self.children = defaultdict(set)
         self.target = pygit2.Repository(target)
@@ -68,9 +69,9 @@ class CommitsGraph:
             revs[m.group('repo')][m.group('branch')] = m.group('rev')
         for repo in self.repos:
             repo_name = '{org}/{name}'.format(**repo)
+            self.revs[repo_name] = OrderedDict()
             if repo_name not in revs:
                 continue
-            self.revs[repo_name] = OrderedDict()
             for n, branch in enumerate(repo['branches']):
                 if branch in revs[repo_name]:
                     self.revs[repo_name][branch] = revs[repo_name][branch]
@@ -140,18 +141,21 @@ class CommitsGraph:
             for m in pc.paths
         ]
         self.paths_for_repos[basepath] = paths
-        self.branches[basepath] = repo['branches'][:]
-        for branch in repo['branches']:
+        branches = repo['branches']
+        self.branches[basepath] = branches[:]
+        known_revs = self.revs.get(basepath, {})
+        for branch_num in range(len(branches)):
+            branch = branches[branch_num]
+            prior_branches = branches[:branch_num]
             cmd = [
                 'git',
                 '-C', basepath,
                 'log',
                 '--parents',
                 '--format=%H %ct %P']
-            base_revisions = None
-            if basepath in self.revs:
-                base_revisions = self.revs[basepath].values()
-                cmd += ['^' + r for r in base_revisions]
+            cmd += ['^' + b for b in prior_branches]
+            if branch in known_revs:
+                cmd += ['^' + known_revs[branch]]
             cmd += [
                 'origin/' + branch,
                 '--'
@@ -166,6 +170,41 @@ class CommitsGraph:
                 for parent in segs:
                     self.parents[commit].add(parent)
                     self.children[parent].add(commit)
+            if branch in known_revs or branch_num == 0:
+                continue
+            # We don't know this branch yet, and it's a fork.
+            # Find the branch point to the previous branches.
+            for prior_branch in prior_branches:
+                cmd = [
+                    'git',
+                    '-C', basepath,
+                    'merge-base',
+                    'origin/' + branch,
+                    'origin/' + prior_branch
+                ]
+                branch_rev = subprocess.run(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    encoding='ascii'
+                ).stdout.strip()
+                if not branch_rev:
+                    continue
+                # We have a branch revision, find the next child on the
+                # route to the prior branch to add that to.
+                cmd = [
+                    'git',
+                    '-C', basepath,
+                    'rev-list', '-n', '1',
+                    '{}..origin/{}'.format(branch_rev, prior_branch)
+                ]
+                fork_rev = subprocess.run(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    encoding='ascii'
+                ).stdout.strip()
+                if fork_rev:
+                    self.forks[fork_rev].append((basepath, branch, branch_rev))
+
         # We have added parents outside of commit range.
         # Find and remove them.
         for commit in list(self.children.keys()):
@@ -196,6 +235,10 @@ class EchoWalker(walker.GraphWalker):
         basepath, branch = self.graph.repos_for_hash[src_rev][0]
         repo = self.repo(basepath)
         self.revs[basepath][branch] = src_rev
+        if src_rev in self.graph.forks:
+            for fork_repo, fork_branch, fork_rev in self.graph.forks[src_rev]:
+                if fork_branch not in self.revs[fork_repo]:
+                    self.revs[fork_repo][fork_branch] = fork_rev
         commitish = repo[src_rev]
         message = (
             commitish.message +

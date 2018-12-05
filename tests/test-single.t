@@ -167,10 +167,42 @@ Recreate target repo in batch
   
   $ cd ..
 
-#Batch convert to new target
-#  $ python -mmozxchannel.git.process batched-target
-#
-#Validate batched results
-#  $ diff -x .git -qr target batched-target
-#  $ cd batched-target
-#  $ git log --format='%H %s%n%b'
+Batch convert to new target
+  $ python -mmozxchannel.git.process batched-target
+
+Validate batched results
+  $ diff -x .git -qr target batched-target
+  $ git -C target log --format='%H %s%n%b'
+  97af06b7126a9ea307f2576ac27de5bf8bb13bd9 c4
+  X-Channel-Converted-Revision: [master] gh1/android1@d676c69ed791624b06c5cc0f510c5204dbc0d9e0
+  X-Channel-Revision: [release] gh1/android1@3f2cc03f88ccec09e1e2c57a1b785753fa382a57
+  
+  9e4c15747fecea0f9ad377e75f407ca783cf71fc Add release
+  
+  92799739ffb1140d899d50eb2ba3bb440625f27c c3
+  X-Channel-Converted-Revision: [master] gh1/android1@45a2654fdb8e62b504eb63cea8d26125028e2c09
+  
+  69ab3c00e0258372f46da0ec3e4426d9b733ae93 c2
+  X-Channel-Converted-Revision: [master] gh1/android1@3f2cc03f88ccec09e1e2c57a1b785753fa382a57
+  
+  220c172534a238026314c7193053b96f304c522f c0
+  X-Channel-Converted-Revision: [master] gh1/android1@28f8ea05feac63c5f3836603297a3bc9f3e2d544
+  
+  d2b396073ea22d136cb636797a4bce9e02936681 Initial config
+  
+  $ git -C batched-target log --format='%H %s%n%b'
+  44abdb027db85b9ef418def7d58973e8dca3abae c4
+  X-Channel-Converted-Revision: [master] gh1/android1@d676c69ed791624b06c5cc0f510c5204dbc0d9e0
+  X-Channel-Revision: [release] gh1/android1@3f2cc03f88ccec09e1e2c57a1b785753fa382a57
+  
+  3e21276fa12f254cb625fbfc6aa4b413fee753d5 c3
+  X-Channel-Converted-Revision: [master] gh1/android1@45a2654fdb8e62b504eb63cea8d26125028e2c09
+  
+  1e194cdac0bbd4382854265b980bc43dda932648 c2
+  X-Channel-Converted-Revision: [master] gh1/android1@3f2cc03f88ccec09e1e2c57a1b785753fa382a57
+  
+  1c919f96d7044bde30099ef07c8aeb8e79744edc c0
+  X-Channel-Converted-Revision: [master] gh1/android1@28f8ea05feac63c5f3836603297a3bc9f3e2d544
+  
+  f9f62493b7c3550e514bdf0baed5b7eb8457f301 Initial config
+  
