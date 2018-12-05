@@ -164,10 +164,15 @@ class CommitsGraph:
                 self.repos_for_hash[commit].append((basepath, branch))
                 self.commit_dates[commit] = max(commit_date, self.commit_dates.get(commit, 0))
                 for parent in segs:
-                    if base_revisions and parent in base_revisions:
-                        continue
                     self.parents[commit].add(parent)
                     self.children[parent].add(commit)
+        # We have added parents outside of commit range.
+        # Find and remove them.
+        for commit in list(self.children.keys()):
+            if commit not in self.commit_dates:
+                children = self.children.pop(commit)
+                for child in children:
+                    self.parents[child].remove(commit)
 
 
 class EchoWalker(walker.GraphWalker):
