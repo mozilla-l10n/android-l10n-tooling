@@ -254,12 +254,6 @@ class EchoWalker(walker.GraphWalker):
 
     def createWorkdir(self, contents):
         workdir = self.graph.target.workdir
-        for entry in os.listdir(workdir):
-            if entry[0] == ".":
-                continue
-            if entry == "config.toml":
-                continue
-            shutil.rmtree(mozpath.join(workdir, entry))
         for tpath, content_list in contents.items():
             try:
                 b_content = merge_channels(tpath, content_list)
