@@ -39,7 +39,7 @@ Create upstream repo, with a single commit for a l10n.toml and a strings.xml
   $ cd ..
 
 Convert to target
-  $ python -mprocess --pull target
+  $ python -mmozxchannel.git.process --pull target
 
 Validate some of the results
   $ cd target
@@ -66,7 +66,7 @@ Add more content to upstream
   $ cd ../../..
 
 Convert to target
-  $ python -mprocess --pull target
+  $ python -mmozxchannel.git.process --pull target
 
 Validate new results
   $ cd target
@@ -94,7 +94,7 @@ Add more content to convert
   $ cd ../../..
 
 Convert to target
-  $ python -mprocess --pull --branch=quarantine target
+  $ python -mmozxchannel.git.process --pull --branch=quarantine target
 
 Validate new results
   $ cd target
@@ -143,7 +143,7 @@ Add release branch to config
   $ cd ..
 
 Convert to target
-  $ python -mprocess --pull --branch=quarantine target
+  $ python -mmozxchannel.git.process --pull --branch=quarantine target
 
 Validate new results
   $ cd target
@@ -168,7 +168,7 @@ Recreate target repo in batch
   $ cd ..
 
 #Batch convert to new target
-#  $ python -mprocess batched-target
+#  $ python -mmozxchannel.git.process batched-target
 #
 #Validate batched results
 #  $ diff -x .git -qr target batched-target

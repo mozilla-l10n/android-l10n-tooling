@@ -10,7 +10,7 @@ import pygit2
 from compare_locales.paths import TOMLParser
 from compare_locales import mozpath
 from compare_locales.merge import merge_channels, MergeNotSupportedError
-import walker
+from mozxchannel import walker
 
 
 def handle(target, target_branch, pull=False):
