@@ -254,17 +254,44 @@ class EchoWalker(walker.GraphWalker):
 
     def createWorkdir(self, contents):
         workdir = self.graph.target.workdir
+        locales = set()
+        includes = []
         for tpath, content_list in contents.items():
             try:
                 b_content = merge_channels(tpath, content_list)
             except MergeNotSupportedError:
                 b_content = content_list[0]
+            if tpath.endswith("l10n.toml"):
+                try:
+                    data = toml.loads(b_content)
+                    if 'locales' in data:
+                        locales.update(data['locales'])
+                    includes.append(tpath)
+                except Exception as e:
+                    print(e)
+                    pass
             tpath = mozpath.join(workdir, tpath)
             tdir = mozpath.dirname(tpath)
             if not os.path.isdir(tdir):
                 os.makedirs(tdir)
             with open(tpath, "wb") as fh:
                 fh.write(b_content)
+        self.ensureL10nToml(workdir, locales, includes)
+
+    def ensureL10nToml(self, workdir, locales, includes):
+        locales = sorted(locales)
+        includes.sort()
+        with open(os.path.join(workdir, "l10n.toml"), "w") as l10n_toml:
+            l10n_toml.write("basepath = \".\"\n\n")
+            l10n_toml.write("locales = [\n")
+            for locale in locales:
+                l10n_toml.write("  \"{}\",\n".format(locale))
+            l10n_toml.write("]\n\n")
+            for include in includes:
+                l10n_toml.write("""\
+[[includes]]
+    path = "{}"
+""".format(include))
 
 
 if __name__ == "__main__":

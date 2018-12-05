@@ -45,8 +45,8 @@ Convert to target
 Validate some of the results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
-  b499c97f447e5d6cb34603ce39ed25f034277c9a c0
-  X-Channel-Converted-Revision: [master] gh1/android1@24ffe06b96b32d762df8262876b1d27da2a22c65
+  bdfe66ae95025e139b117da3a84b904c71961382 c0
+  X-Channel-Converted-Revision: [master] gh1/android1@cf19889319a240d861e42b248fdcad7e99251c58
   
   $ target_rev
   $ cd ..
@@ -64,7 +64,10 @@ Add more content to upstream
   > action_ok=OK
   $ git commit -qam'c2'
   $ git log -n1 --format='%H'
-  e0fbb23763b49c6150238edc090eb1fd1fea9d49
+  3ada024309d03ce6a8c4dd0b53cea787ee599518
+  $ RELEASE_REV = `git log -n1 --format='%H'`
+  /bin/sh: line 85: RELEASE_REV: command not found
+  [127]
   $ cd ../../..
 
 Convert to target
@@ -73,8 +76,8 @@ Convert to target
 Validate new results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
-  c7d96cce553fcf9517e36d1de86234c1d61304b8 c2
-  X-Channel-Converted-Revision: [master] gh1/android1@e0fbb23763b49c6150238edc090eb1fd1fea9d49
+  95c3aca5c2bc8b32060af88f559146c22b80cee2 c2
+  X-Channel-Converted-Revision: [master] gh1/android1@3ada024309d03ce6a8c4dd0b53cea787ee599518
   
   $ target_rev
   $ cd ..
@@ -93,7 +96,7 @@ Add more content to convert
   > action_submit=Submit
   $ git commit -qam'c3'
   $ git log -n1 --format='%H'
-  407a7be1aa9baf68ab30e122f4b08c78cf1eafba
+  879fbd2737b3cef4b5eda759ec218fd9a27ae971
   $ cd ../../..
 
 Convert to target
@@ -102,8 +105,8 @@ Convert to target
 Validate new results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV quarantine
-  a9eb77950f49e826c4c4b71d4fa5268e0d6cc8b7 c3
-  X-Channel-Converted-Revision: [master] gh1/android1@407a7be1aa9baf68ab30e122f4b08c78cf1eafba
+  49d2fa5c01664dad2c5ee903142e760bac7a9457 c3
+  X-Channel-Converted-Revision: [master] gh1/android1@879fbd2737b3cef4b5eda759ec218fd9a27ae971
   
   $ target_rev
 
@@ -112,13 +115,13 @@ Merge quarantine
   $ git merge -q quarantine
   $ git checkout -q quarantine
   $ git branch -v
-    master     a9eb779 c3
-  * quarantine a9eb779 c3
+    master     49d2fa5 c3
+  * quarantine 49d2fa5 c3
   $ cd ..
 
 Add a release fork
   $ cd upstream/gh1/android1
-  $ git checkout -qb release e0fbb23763b49c6150238edc090eb1fd1fea9d49
+  $ git checkout -qb release $RELEASE_REV
   $ git checkout -q master
 Modify development branch
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml \
@@ -127,10 +130,10 @@ Modify development branch
   > action_other=Other
   $ git commit -qam'c4'
   $ git log -n1 --format='%H'
-  487a9c4cf79c2dddc2064515c1103e02d00edac6
+  44de42136b8f29e85e296b5438949716004b0447
   $ git branch -v
-  * master  487a9c4 c4
-    release e0fbb23 c2
+  * master  44de421 c4
+    release 879fbd2 c3
   $ cd ../../..
 
 Add release branch to config
@@ -153,11 +156,11 @@ Convert to target
 Validate new results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV quarantine
-  db72d42fbcc6103bbbde63567082fdc1f0412408 c4
-  X-Channel-Converted-Revision: [master] gh1/android1@487a9c4cf79c2dddc2064515c1103e02d00edac6
-  X-Channel-Revision: [release] gh1/android1@e0fbb23763b49c6150238edc090eb1fd1fea9d49
+  4af0e0dd0454083eafd1774b556fa4193e120ee4 c4
+  X-Channel-Converted-Revision: [master] gh1/android1@44de42136b8f29e85e296b5438949716004b0447
+  X-Channel-Revision: [release] gh1/android1@879fbd2737b3cef4b5eda759ec218fd9a27ae971
   
-  f652d21ebe443597fcaaee8563b197489cd9d570 Add release
+  cbbb6d84a93bf7ac48e18448d97919426bc5aa46 Add release
   
   $ cd ..
 
@@ -178,36 +181,77 @@ Batch convert to new target
 Validate batched results
   $ diff -x .git -qr target batched-target
   $ git -C target log --format='%H %s%n%b'
-  db72d42fbcc6103bbbde63567082fdc1f0412408 c4
-  X-Channel-Converted-Revision: [master] gh1/android1@487a9c4cf79c2dddc2064515c1103e02d00edac6
-  X-Channel-Revision: [release] gh1/android1@e0fbb23763b49c6150238edc090eb1fd1fea9d49
+  4af0e0dd0454083eafd1774b556fa4193e120ee4 c4
+  X-Channel-Converted-Revision: [master] gh1/android1@44de42136b8f29e85e296b5438949716004b0447
+  X-Channel-Revision: [release] gh1/android1@879fbd2737b3cef4b5eda759ec218fd9a27ae971
   
-  f652d21ebe443597fcaaee8563b197489cd9d570 Add release
+  cbbb6d84a93bf7ac48e18448d97919426bc5aa46 Add release
   
-  a9eb77950f49e826c4c4b71d4fa5268e0d6cc8b7 c3
-  X-Channel-Converted-Revision: [master] gh1/android1@407a7be1aa9baf68ab30e122f4b08c78cf1eafba
+  49d2fa5c01664dad2c5ee903142e760bac7a9457 c3
+  X-Channel-Converted-Revision: [master] gh1/android1@879fbd2737b3cef4b5eda759ec218fd9a27ae971
   
-  c7d96cce553fcf9517e36d1de86234c1d61304b8 c2
-  X-Channel-Converted-Revision: [master] gh1/android1@e0fbb23763b49c6150238edc090eb1fd1fea9d49
+  95c3aca5c2bc8b32060af88f559146c22b80cee2 c2
+  X-Channel-Converted-Revision: [master] gh1/android1@3ada024309d03ce6a8c4dd0b53cea787ee599518
   
-  b499c97f447e5d6cb34603ce39ed25f034277c9a c0
-  X-Channel-Converted-Revision: [master] gh1/android1@24ffe06b96b32d762df8262876b1d27da2a22c65
+  bdfe66ae95025e139b117da3a84b904c71961382 c0
+  X-Channel-Converted-Revision: [master] gh1/android1@cf19889319a240d861e42b248fdcad7e99251c58
   
   d2b396073ea22d136cb636797a4bce9e02936681 Initial config
   
   $ git -C batched-target log --format='%H %s%n%b'
-  086bfabd56b4ac5f954fe8b91375746f744ec08b c4
-  X-Channel-Converted-Revision: [master] gh1/android1@487a9c4cf79c2dddc2064515c1103e02d00edac6
-  X-Channel-Revision: [release] gh1/android1@e0fbb23763b49c6150238edc090eb1fd1fea9d49
+  b6daed0cc8538f587e2d0d1c4b12e7b2d631bec9 c4
+  X-Channel-Converted-Revision: [master] gh1/android1@44de42136b8f29e85e296b5438949716004b0447
+  X-Channel-Revision: [release] gh1/android1@879fbd2737b3cef4b5eda759ec218fd9a27ae971
   
-  44aade6f379e42a7bf60d41cfad704d2e8e825db c3
-  X-Channel-Converted-Revision: [master] gh1/android1@407a7be1aa9baf68ab30e122f4b08c78cf1eafba
+  7ec1d5b969de026daf59d3a94b5ca82a7de76caa c3
+  X-Channel-Converted-Revision: [master] gh1/android1@879fbd2737b3cef4b5eda759ec218fd9a27ae971
   
-  d3a1d9236bcff0313d6280e3cf8c95ef281c663f c2
-  X-Channel-Converted-Revision: [master] gh1/android1@e0fbb23763b49c6150238edc090eb1fd1fea9d49
+  04e2c17ee89288b0e606f8c0b3a5c70cc0d04323 c2
+  X-Channel-Converted-Revision: [master] gh1/android1@3ada024309d03ce6a8c4dd0b53cea787ee599518
   
-  fc94523050e8ee1706c4da7e84b0813639aecb0c c0
-  X-Channel-Converted-Revision: [master] gh1/android1@24ffe06b96b32d762df8262876b1d27da2a22c65
+  14fe5bc4ffda1c39d695e15431cefe97c0a267c1 c0
+  X-Channel-Converted-Revision: [master] gh1/android1@cf19889319a240d861e42b248fdcad7e99251c58
   
   f9f62493b7c3550e514bdf0baed5b7eb8457f301 Initial config
   
+Run compare-locales on the output
+  $ compare-locales target/l10n.toml target
+  gh1/android1/app/src/main/res
+    values-b+sr+Cyrl/strings.xml
+        // add and localize this file
+    values-de/strings.xml
+        // add and localize this file
+    values-iw/strings.xml
+        // add and localize this file
+  de:
+  missing           4
+  missing_w         5
+  0% of entries changed
+  he:
+  missing           4
+  missing_w         5
+  0% of entries changed
+  sr-Cyrl:
+  missing           4
+  missing_w         5
+  0% of entries changed
+  $ compare-locales batched-target/l10n.toml batched-target
+  gh1/android1/app/src/main/res
+    values-b+sr+Cyrl/strings.xml
+        // add and localize this file
+    values-de/strings.xml
+        // add and localize this file
+    values-iw/strings.xml
+        // add and localize this file
+  de:
+  missing           4
+  missing_w         5
+  0% of entries changed
+  he:
+  missing           4
+  missing_w         5
+  0% of entries changed
+  sr-Cyrl:
+  missing           4
+  missing_w         5
+  0% of entries changed
