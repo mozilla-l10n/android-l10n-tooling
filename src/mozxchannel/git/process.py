@@ -1,7 +1,6 @@
 import argparse
 from collections import defaultdict
 import os
-import re
 import subprocess
 
 import pytoml as toml
@@ -10,8 +9,8 @@ from compare_locales import mozpath
 from compare_locales.merge import merge_channels, MergeNotSupportedError
 from mozxchannel import walker
 from mozxchannel.git.repository import (
-    Repository,
     SourceRepository,
+    TargetRepository,
 )
 
 
@@ -30,45 +29,22 @@ class CommitsGraph:
         self.config = None
         self.repos = None
         self.repos_for_hash = defaultdict(list)
+        self.hashes_for_repo = defaultdict(set)
         self.paths_for_repos = {}
         self.branches = {}
         self.commit_dates = {}
         self.forks = defaultdict(list)
         self.parents = defaultdict(set)
         self.children = defaultdict(set)
-        self.target = Repository(target).git
+        self.target = TargetRepository(target, branch)
         self.target_branch = branch
         self.revs = {}
 
     def loadRevs(self):
-        if self.target.is_empty:
-            return
-        cmd = [
-            "git",
-            "-C",
-            self.target.path,
-            "log",
-            "-n",
-            "1",
-            "--grep=X-Channel-Converted-Revision:",
-            "--format=%H",
-            self.target_branch,
-        ]
-        last_converted = subprocess.run(
-            cmd, stdout=subprocess.PIPE, encoding="ascii"
-        ).stdout.strip()
-        if not last_converted:
-            last_converted = \
-                self.target.lookup_branch(self.target_branch).target
-        head = self.target[last_converted]
-        revs = defaultdict(dict)
-        for m in re.finditer(
-            "^X-Channel-(?:Converted-)?Revision: "
-            "\[(?P<branch>.+?)\] (?P<repo>[^@\n]*?)@(?P<rev>[a-f0-9]{40})$",
-            head.message,
-            re.M,
-        ):
-            revs[m.group("repo")][m.group("branch")] = m.group("rev")
+        revs = {}
+        for _r in self.target.converted_revs():
+            revs.update(_r)
+            break
         for repo in self.repos:
             repo_name = repo.name
             self.revs[repo_name] = {}
@@ -81,16 +57,14 @@ class CommitsGraph:
     @property
     def roots(self):
         roots = list(set(self.children) - set(self.parents))
-        if roots:
-            return roots
-        if len(self.repos_for_hash) == 1:
+        for commits in self.hashes_for_repo.values():
             # only one commit, we don't have parents or children,
             # but something to do
-            roots += self.repos_for_hash.keys()
+            roots += commits
         return roots
 
     def loadConfigs(self):
-        config_path = os.path.join(self.target.workdir, "config.toml")
+        config_path = os.path.join(self.target.git.workdir, "config.toml")
         repo_configs = toml.load(open(config_path))["repo"]
         self.repos = [
             SourceRepository(config)
@@ -104,6 +78,13 @@ class CommitsGraph:
     def gather(self):
         for repo in self.repos:
             self.gather_repo(repo)
+        # We have added parents outside of commit range.
+        # Find and remove them.
+        for commit in list(self.children.keys()):
+            if commit not in self.commit_dates:
+                children = self.children.pop(commit)
+                for child in children:
+                    self.parents[child].remove(commit)
 
     def gather_repo(self, repo):
         basepath = repo.path
@@ -132,6 +113,12 @@ class CommitsGraph:
             ]
             if branch in known_revs:
                 cmd += ["^" + known_revs[branch]]
+                block_revs = []
+            elif branch_num == 0:
+                # We haven't seen this repo yet.
+                # Block all known revs in the target from being converted again
+                # in case of repository-level forks.
+                block_revs = self.target.known_revs()
             cmd += ["origin/" + branch, "--"] + paths
             out = subprocess.run(
                 cmd,
@@ -140,8 +127,11 @@ class CommitsGraph:
             for commit_line in out.splitlines():
                 segs = commit_line.split()
                 commit = segs.pop(0)
+                if commit in block_revs:
+                    continue
                 commit_date = int(segs.pop(0))
                 self.repos_for_hash[commit].append((basepath, branch))
+                self.hashes_for_repo[basepath].add(commit)
                 self.commit_dates[commit] = max(
                     commit_date, self.commit_dates.get(commit, 0)
                 )
@@ -182,14 +172,6 @@ class CommitsGraph:
                 ).stdout.strip()
                 if fork_rev:
                     self.forks[fork_rev].append((basepath, branch, branch_rev))
-
-        # We have added parents outside of commit range.
-        # Find and remove them.
-        for commit in list(self.children.keys()):
-            if commit not in self.commit_dates:
-                children = self.children.pop(commit)
-                for child in children:
-                    self.parents[child].remove(commit)
 
 
 class EchoWalker(walker.GraphWalker):
@@ -240,13 +222,13 @@ class EchoWalker(walker.GraphWalker):
                     other_rev,
                 )
         self.createWorkdir(contents)
-        self.graph.target.index.add_all()
-        self.graph.target.index.write()
-        tree_id = self.graph.target.index.write_tree()
+        self.graph.target.git.index.add_all()
+        self.graph.target.git.index.write()
+        tree_id = self.graph.target.git.index.write_tree()
         parents = []
-        if not self.graph.target.is_empty:
-            parents.append(self.graph.target.head.target)
-        self.graph.target.create_commit(
+        if not self.graph.target.git.is_empty:
+            parents.append(self.graph.target.git.head.target)
+        self.graph.target.git.create_commit(
             "refs/heads/" + self.target_branch,
             commitish.author,
             commitish.committer,
@@ -256,7 +238,7 @@ class EchoWalker(walker.GraphWalker):
         )
 
     def createWorkdir(self, contents):
-        workdir = self.graph.target.workdir
+        workdir = self.graph.target.git.workdir
         locales = set()
         includes = []
         for tpath, content_list in contents.items():
