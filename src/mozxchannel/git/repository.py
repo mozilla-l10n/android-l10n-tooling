@@ -30,6 +30,7 @@ class SourceRepository(Repository):
             path = "{}/{}".format(root, path)
         super().__init__(path)
         self.config = config
+        self._ref_cache = {}
 
     @property
     def target_root(self):
@@ -38,6 +39,17 @@ class SourceRepository(Repository):
     @property
     def branches(self):
         return self.config["branches"]
+
+    def ref(self, branch_name):
+        # fall back to local branch
+        self._ref_cache[branch_name] = branch_name
+        # but prefer remote state
+        for remote in self.git.remotes:
+            ref = '{}/{}'.format(remote.name, branch_name)
+            if self.git.lookup_branch(ref, pygit2.GIT_BRANCH_REMOTE):
+                self._ref_cache[branch_name] = ref
+                break
+        return self._ref_cache[branch_name]
 
 
 CHANNEL_REVS = re.compile(

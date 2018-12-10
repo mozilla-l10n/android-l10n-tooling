@@ -109,7 +109,7 @@ class CommitsGraph:
                 "--parents",
                 "--format=%H %ct %P"
             ] + [
-                "^" + b for b in prior_branches
+                "^" + repo.ref(b) for b in prior_branches
             ]
             if branch in known_revs:
                 cmd += ["^" + known_revs[branch]]
@@ -119,7 +119,7 @@ class CommitsGraph:
                 # Block all known revs in the target from being converted again
                 # in case of repository-level forks.
                 block_revs = self.target.known_revs()
-            cmd += ["origin/" + branch, "--"] + paths
+            cmd += [repo.ref(branch), "--"] + paths
             out = subprocess.run(
                 cmd,
                 stdout=subprocess.PIPE, encoding="ascii"
@@ -148,8 +148,8 @@ class CommitsGraph:
                     "-C",
                     basepath,
                     "merge-base",
-                    "origin/" + branch,
-                    "origin/" + prior_branch,
+                    repo.ref(branch),
+                    repo.ref(prior_branch),
                 ]
                 branch_rev = subprocess.run(
                     cmd, stdout=subprocess.PIPE, encoding="ascii"
@@ -165,7 +165,7 @@ class CommitsGraph:
                     "rev-list",
                     "-n",
                     "1",
-                    "{}..origin/{}".format(branch_rev, prior_branch),
+                    "{}..{}".format(branch_rev, repo.ref(prior_branch)),
                 ]
                 fork_rev = subprocess.run(
                     cmd, stdout=subprocess.PIPE, encoding="ascii"
