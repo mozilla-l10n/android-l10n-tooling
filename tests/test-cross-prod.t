@@ -37,10 +37,6 @@ Start creating the original repository and it's conversion.
   $ git log -n1 --format='%H'
   cf19889319a240d861e42b248fdcad7e99251c58
   $ cd ../../..
-  $ mkdir gh1
-  $ cd gh1
-  $ git clone -q ../upstream/gh1/android1
-  $ cd ..
 
 Convert to target
   $ python -mmozxchannel.git.process --pull target

@@ -34,10 +34,6 @@ Create upstream repo, with a single commit for a l10n.toml and a strings.xml
   $ git add .
   $ git commit -qm'c0'
   $ cd ../../..
-  $ mkdir gh1
-  $ cd gh1
-  $ git clone -q ../upstream/gh1/android1
-  $ cd ..
 
 Convert to target
   $ python -mmozxchannel.git.process --pull target
@@ -65,9 +61,7 @@ Add more content to upstream
   $ git commit -qam'c2'
   $ git log -n1 --format='%H'
   3ada024309d03ce6a8c4dd0b53cea787ee599518
-  $ RELEASE_REV = `git log -n1 --format='%H'`
-  /bin/sh: line 85: RELEASE_REV: command not found
-  [127]
+  $ RELEASE_REV=`git log -n1 --format='%H'`
   $ cd ../../..
 
 Convert to target
@@ -133,7 +127,7 @@ Modify development branch
   44de42136b8f29e85e296b5438949716004b0447
   $ git branch -v
   * master  44de421 c4
-    release 879fbd2 c3
+    release 3ada024 c2
   $ cd ../../..
 
 Add release branch to config
@@ -156,9 +150,9 @@ Convert to target
 Validate new results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV quarantine
-  4af0e0dd0454083eafd1774b556fa4193e120ee4 c4
+  67a1b6a6deea2ddb798d6e95df72a89a650a5187 c4
   X-Channel-Converted-Revision: [master] gh1/android1@44de42136b8f29e85e296b5438949716004b0447
-  X-Channel-Revision: [release] gh1/android1@879fbd2737b3cef4b5eda759ec218fd9a27ae971
+  X-Channel-Revision: [release] gh1/android1@3ada024309d03ce6a8c4dd0b53cea787ee599518
   
   cbbb6d84a93bf7ac48e18448d97919426bc5aa46 Add release
   
@@ -181,9 +175,9 @@ Batch convert to new target
 Validate batched results
   $ diff -x .git -qr target batched-target
   $ git -C target log --format='%H %s%n%b'
-  4af0e0dd0454083eafd1774b556fa4193e120ee4 c4
+  67a1b6a6deea2ddb798d6e95df72a89a650a5187 c4
   X-Channel-Converted-Revision: [master] gh1/android1@44de42136b8f29e85e296b5438949716004b0447
-  X-Channel-Revision: [release] gh1/android1@879fbd2737b3cef4b5eda759ec218fd9a27ae971
+  X-Channel-Revision: [release] gh1/android1@3ada024309d03ce6a8c4dd0b53cea787ee599518
   
   cbbb6d84a93bf7ac48e18448d97919426bc5aa46 Add release
   
@@ -199,9 +193,9 @@ Validate batched results
   d2b396073ea22d136cb636797a4bce9e02936681 Initial config
   
   $ git -C batched-target log --format='%H %s%n%b'
-  b6daed0cc8538f587e2d0d1c4b12e7b2d631bec9 c4
+  33b4ea650d910b390eeee3ae656edaf992ea9279 c4
   X-Channel-Converted-Revision: [master] gh1/android1@44de42136b8f29e85e296b5438949716004b0447
-  X-Channel-Revision: [release] gh1/android1@879fbd2737b3cef4b5eda759ec218fd9a27ae971
+  X-Channel-Revision: [release] gh1/android1@3ada024309d03ce6a8c4dd0b53cea787ee599518
   
   7ec1d5b969de026daf59d3a94b5ca82a7de76caa c3
   X-Channel-Converted-Revision: [master] gh1/android1@879fbd2737b3cef4b5eda759ec218fd9a27ae971

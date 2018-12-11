@@ -1,4 +1,5 @@
 from collections import defaultdict
+import os
 import re
 import subprocess
 import pygit2
@@ -19,7 +20,21 @@ class Repository(object):
         return self._git
 
     def pull(self):
-        cmd = ["git", "-C", self.path, "pull", "-q"]
+        if os.path.isdir(self.path):
+            cmd = ["git", "-C", self.path, "pull", "-q"]
+        else:
+            orgdir = os.path.dirname(self.path)
+            if not os.path.isdir(orgdir):
+                os.makedirs(orgdir)
+            cmd = [
+                "git",
+                "-C", orgdir,
+                "clone", "-q",
+                os.environ.get(
+                    "X_CHANNEL_UPSTREAM",
+                    "https://github.com"
+                ) + "/" + self.path
+            ]
         subprocess.run(cmd)
 
 
