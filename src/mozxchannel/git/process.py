@@ -198,10 +198,10 @@ class CommitWalker(walker.GraphWalker):
         commitish = repo[src_rev]
         message = commitish.message + "\n"
         contents = defaultdict(list)
-        for other_path, other_revs in self.revs.items():
-            paths = self.graph.paths_for_repos[other_path]
-            other_repo = self.repo(other_path)
-            other_branches = self.graph.branches[other_path]
+        for other_repo in self.graph.repos:
+            other_revs = self.revs[other_repo.name]
+            paths = self.graph.paths_for_repos[other_repo.name]
+            other_branches = self.graph.branches[other_repo.name]
             for other_branch in other_branches:
                 if other_branch not in other_revs:
                     continue
@@ -215,10 +215,10 @@ class CommitWalker(walker.GraphWalker):
                         )
                 message += "X-Channel{}-Revision: [{}] {}@{}\n".format(
                     "-Converted"
-                    if other_path == basepath and other_branch == branch
+                    if other_repo.name == basepath and other_branch == branch
                     else "",
                     other_branch,
-                    other_path,
+                    other_repo.name,
                     other_rev,
                 )
         self.createWorkdir(contents)
