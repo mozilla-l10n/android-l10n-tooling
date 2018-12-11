@@ -174,9 +174,9 @@ class CommitsGraph:
                     self.forks[fork_rev].append((basepath, branch, branch_rev))
 
 
-class EchoWalker(walker.GraphWalker):
+class CommitWalker(walker.GraphWalker):
     def __init__(self, graph, branch):
-        super(EchoWalker, self).__init__(graph)
+        super(CommitWalker, self).__init__(graph)
         self.revs = defaultdict(dict)
         for repo_name, revs in graph.revs.items():
             self.revs[repo_name] = revs.copy()
@@ -286,5 +286,5 @@ if __name__ == "__main__":
     p.add_argument("--branch", default="master")
     args = p.parse_args()
     graph = handle(args.target, args.branch, pull=args.pull)
-    echo = EchoWalker(graph, args.branch)
+    echo = CommitWalker(graph, args.branch)
     echo.walkGraph()
