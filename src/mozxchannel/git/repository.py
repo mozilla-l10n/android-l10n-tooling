@@ -5,6 +5,9 @@ import subprocess
 import pygit2
 
 
+NULL_REV = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"  # noqa
+
+
 class Repository(object):
     def __init__(self, path):
         self.path = path

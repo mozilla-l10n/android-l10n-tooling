@@ -172,7 +172,9 @@ class CommitsGraph:
                     cmd, stdout=subprocess.PIPE, encoding="ascii"
                 ).stdout.strip()
                 if fork_rev:
-                    self.forks[fork_rev].append((repo.name, branch, branch_rev))
+                    self.forks[fork_rev].append(
+                        (repo.name, branch, branch_rev)
+                    )
 
 
 class CommitWalker(walker.GraphWalker):
