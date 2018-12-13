@@ -25,9 +25,10 @@ def handle(target, target_branch, pull=False):
 
 
 class CommitsGraph:
-    def __init__(self, target, branch):
+    def __init__(self, target, branch, source=None):
         self.config = None
         self.repos = None
+        self.source = source
         self.repos_for_hash = defaultdict(list)
         self.hashes_for_repo = defaultdict(set)
         self.paths_for_repos = {}
@@ -67,7 +68,7 @@ class CommitsGraph:
         config_path = os.path.join(self.target.git.workdir, "config.toml")
         repo_configs = toml.load(open(config_path))["repo"]
         self.repos = [
-            SourceRepository(config)
+            SourceRepository(config, root=self.source)
             for config in repo_configs
         ]
 
@@ -96,10 +97,10 @@ class CommitsGraph:
             )
             for m in pc.paths
         ]
-        self.paths_for_repos[basepath] = paths
+        self.paths_for_repos[repo.name] = paths
         branches = repo.branches
-        self.branches[basepath] = branches[:]
-        known_revs = self.revs.get(basepath, {})
+        self.branches[repo.name] = branches[:]
+        known_revs = self.revs.get(repo.name, {})
         for branch_num in range(len(branches)):
             branch = branches[branch_num]
             prior_branches = branches[:branch_num]
@@ -130,8 +131,8 @@ class CommitsGraph:
                 if commit in block_revs:
                     continue
                 commit_date = int(segs.pop(0))
-                self.repos_for_hash[commit].append((basepath, branch))
-                self.hashes_for_repo[basepath].add(commit)
+                self.repos_for_hash[commit].append((repo.name, branch))
+                self.hashes_for_repo[repo.name].add(commit)
                 self.commit_dates[commit] = max(
                     commit_date, self.commit_dates.get(commit, 0)
                 )
@@ -171,13 +172,13 @@ class CommitsGraph:
                     cmd, stdout=subprocess.PIPE, encoding="ascii"
                 ).stdout.strip()
                 if fork_rev:
-                    self.forks[fork_rev].append((basepath, branch, branch_rev))
+                    self.forks[fork_rev].append((repo.name, branch, branch_rev))
 
 
 class CommitWalker(walker.GraphWalker):
     def __init__(self, graph, branch):
         super(CommitWalker, self).__init__(graph)
-        self.revs = defaultdict(dict)
+        self.revs = {}
         for repo_name, revs in graph.revs.items():
             self.revs[repo_name] = revs.copy()
         self.target_branch = branch
@@ -188,9 +189,9 @@ class CommitWalker(walker.GraphWalker):
                 return repo
 
     def handlerev(self, src_rev):
-        basepath, branch = self.graph.repos_for_hash[src_rev][0]
-        repo = self.repo(basepath)
-        self.revs[basepath][branch] = src_rev
+        repo_name, branch = self.graph.repos_for_hash[src_rev][0]
+        repo = self.repo(repo_name)
+        self.revs[repo.name][branch] = src_rev
         if src_rev in self.graph.forks:
             for fork_repo, fork_branch, fork_rev in self.graph.forks[src_rev]:
                 if fork_branch not in self.revs[fork_repo]:
@@ -215,7 +216,7 @@ class CommitWalker(walker.GraphWalker):
                         )
                 message += "X-Channel{}-Revision: [{}] {}@{}\n".format(
                     "-Converted"
-                    if other_repo.name == basepath and other_branch == branch
+                    if other_repo.name == repo.name and other_branch == branch
                     else "",
                     other_branch,
                     other_repo.name,
