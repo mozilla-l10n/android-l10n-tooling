@@ -19,7 +19,10 @@ class CramMeta(type):
 
             def create_test(test_name, function_name):
                 def test_(self):
-                    self.assertFalse(main([os.path.join(DIR, test_name)]))
+                    self.assertFalse(main([
+                        '--shell', 'bash',
+                        os.path.join(DIR, test_name)
+                    ]))
                 test_.__name__ = function_name
                 return test_
             attributedict[tn] = create_test(f, tn)
