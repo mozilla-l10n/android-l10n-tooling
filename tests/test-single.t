@@ -78,8 +78,7 @@ Validate new results
 
 Create quarantine
   $ cd target
-  $ git checkout -b quarantine
-  Switched to a new branch 'quarantine'
+  $ git checkout -qb quarantine
   $ cd ..
 
 Add more content to convert
