@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+import argparse
+
+
+HEADER = """\
+basepath = "."
+
+locales = [
+"""
+
+TAIL = """\
+]
+
+[env]
+
+[[paths]]
+  reference = "app/src/main/res/values/strings.xml"
+  l10n = "app/src/main/res/values-{android_locale}/strings.xml"
+"""
+
+def cli():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--locales', nargs='*', default=[])
+    args = parser.parse_args()
+    with open('l10n.toml', 'w') as cf:
+        cf.write(HEADER)
+        for loc in sorted(args.locales):
+            cf.write("  \"{}\",\n".format(loc))
+        cf.write(TAIL)
+
+
+if __name__ == '__main__':
+    cli()

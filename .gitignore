@@ -1,0 +1,4 @@
+src/mozxchannel.egg-info
+tests/test-*.t.err
+__pycache__
+.eggs
