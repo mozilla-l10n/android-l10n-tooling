@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import pygit2
+import pytoml as toml
 
 
 NULL_REV = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"  # noqa
@@ -44,6 +45,7 @@ class Repository(object):
 class SourceRepository(Repository):
     def __init__(self, config, root=None):
         self.name = path = "{}/{}".format(config["org"], config["name"])
+        self.branch = config["branch"]
         if root is not None:
             path = "{}/{}".format(root, path)
         super().__init__(path)
@@ -54,9 +56,22 @@ class SourceRepository(Repository):
     def target_root(self):
         return self.config.get('target', self.name)
 
-    @property
     def branches(self):
-        return self.config["branches"]
+        rev = self.lookup_branch(self.branch).target
+        toml_data = self[self[rev].tree['l10n.toml'].id].data
+        config = toml.loads(toml_data)
+        return config.get("branches", [self.branch])
+
+    def lookup_branch(self, branch_name):
+        # prefer remote state
+        for remote in self.git.remotes:
+            ref = '{}/{}'.format(remote.name, branch_name)
+            branch = self.git.lookup_branch(ref, pygit2.GIT_BRANCH_REMOTE)
+            if branch:
+                return branch
+        # but fall back to local branch
+        return self.git.lookup_branch(branch_name)
+
 
     def ref(self, branch_name):
         # fall back to local branch

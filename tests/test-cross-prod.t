@@ -7,15 +7,13 @@ Base target repository with a configuration for the first upstream repo
   > [[repo]]
   > org = "gh1"
   > name = "android1"
-  > branches = [
-  >     "master",
-  > ]
+  > branch = "master"
   > target = "browsers"
   > EOF
   $ git add config.toml
   $ git commit -qm'Initial config'
   $ git log  --format='%H %s%n%b'
-  9dba9fd166aa8a2d953e703b3458df88c3688a22 Initial config
+  bfd39b6816be975b5d62d247104e52951f9acc76 Initial config
   
   $ target_rev
   $ cd ..
@@ -35,7 +33,7 @@ Start creating the original repository and it's conversion.
   $ git add .
   $ git commit -qm'c0'
   $ git log -n1 --format='%H'
-  cf19889319a240d861e42b248fdcad7e99251c58
+  a5643d6afc7bad7e741991d4fcc935146ee27e72
   $ cd ../../..
 
 Convert to target
@@ -44,8 +42,8 @@ Convert to target
 Validate some of the results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
-  5b6f0ae83aac1e84e9bbdf620fe9937cd2909b1a c0
-  X-Channel-Converted-Revision: [master] gh1/android1@cf19889319a240d861e42b248fdcad7e99251c58
+  d043472077db4d0899661b9660955be33f5cec25 c0
+  X-Channel-Converted-Revision: [master] gh1/android1@a5643d6afc7bad7e741991d4fcc935146ee27e72
   
   $ target_rev
   $ cd ..
@@ -61,7 +59,7 @@ Create a fork of the project, create independent new strings in each.
   $ git add .
   $ git commit -qm'c11'
   $ git log -n1 --format='%H'
-  51042d60bdfdd96afa8bb32f60b4ac288eccc222
+  1d91a5bb326114cf1876450fe0f4a5586e1a1927
   $ cd ../android2
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml \
   > action_cancel=Cancel \
@@ -69,7 +67,7 @@ Create a fork of the project, create independent new strings in each.
   $ git add .
   $ git commit -qm'c21'
   $ git log -n1 --format='%H'
-  225b91312a02097fcca6e38ae6383afb8b1e3fca
+  d50c15729413735daea8a7148d8c761dd44bb6a2
   $ cd ../../../gh1
   $ git clone -q ../upstream/gh1/android2
   $ cd ..
@@ -80,16 +78,12 @@ Add android2 to config
   > [[repo]]
   > org = "gh1"
   > name = "android1"
-  > branches = [
-  >     "master",
-  > ]
+  > branch = "master"
   > target = "browsers"
   > [[repo]]
   > org = "gh1"
   > name = "android2"
-  > branches = [
-  >     "master",
-  > ]
+  > branch = "master"
   > target = "browsers"
   > EOF
   $ cd ..
@@ -100,13 +94,13 @@ Convert to target
 Validate some of the results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
-  ddef50e884633fc8e915ba1fc1861673b3a8ba7b c11
-  X-Channel-Converted-Revision: [master] gh1/android1@51042d60bdfdd96afa8bb32f60b4ac288eccc222
-  X-Channel-Revision: [master] gh1/android2@225b91312a02097fcca6e38ae6383afb8b1e3fca
+  6e56796197c89f440a5f9549cc17565d0ea859c9 c11
+  X-Channel-Converted-Revision: [master] gh1/android1@1d91a5bb326114cf1876450fe0f4a5586e1a1927
+  X-Channel-Revision: [master] gh1/android2@d50c15729413735daea8a7148d8c761dd44bb6a2
   
-  77256dd518753afe725847f1755527d5e4815d64 c21
-  X-Channel-Revision: [master] gh1/android1@cf19889319a240d861e42b248fdcad7e99251c58
-  X-Channel-Converted-Revision: [master] gh1/android2@225b91312a02097fcca6e38ae6383afb8b1e3fca
+  8697a33930d5abda92c6ac4bbc40fb749ef89e6d c21
+  X-Channel-Revision: [master] gh1/android1@a5643d6afc7bad7e741991d4fcc935146ee27e72
+  X-Channel-Converted-Revision: [master] gh1/android2@d50c15729413735daea8a7148d8c761dd44bb6a2
   
   $ target_rev
   $ cd ..

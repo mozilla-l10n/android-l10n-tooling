@@ -9,6 +9,12 @@ basepath = "."
 locales = [
 """
 
+MID = """\
+]
+
+branches = [
+"""
+
 TAIL = """\
 ]
 
@@ -22,10 +28,14 @@ TAIL = """\
 def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument('--locales', nargs='*', default=[])
+    parser.add_argument('--branches', nargs='*', default=["master"])
     args = parser.parse_args()
     with open('l10n.toml', 'w') as cf:
         cf.write(HEADER)
         for loc in sorted(args.locales):
+            cf.write("  \"{}\",\n".format(loc))
+        cf.write(MID)
+        for loc in sorted(args.branches):
             cf.write("  \"{}\",\n".format(loc))
         cf.write(TAIL)
 

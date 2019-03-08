@@ -51,7 +51,7 @@ class CommitsGraph:
             self.revs[repo_name] = {}
             if repo_name not in revs:
                 continue
-            for n, branch in enumerate(repo.branches):
+            for n, branch in enumerate(repo.branches()):
                 if branch in revs[repo_name]:
                     self.revs[repo_name][branch] = revs[repo_name][branch]
 
@@ -98,7 +98,7 @@ class CommitsGraph:
             for m in pc.paths
         ]
         self.paths_for_repos[repo.name] = paths
-        branches = repo.branches
+        branches = repo.branches()
         self.branches[repo.name] = branches[:]
         known_revs = self.revs.get(repo.name, {})
         for branch_num in range(len(branches)):
