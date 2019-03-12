@@ -104,3 +104,70 @@ Validate some of the results
   
   $ target_rev
   $ cd ..
+
+Add independent project
+  $ cd upstream/gh1
+  $ git init -q single-android
+  $ cd single-android
+  $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml action_ok=OK
+  $ $TESTDIR/l10n-toml --locales de fr zh-TW
+  $ compare-locales --validate l10n.toml .
+  en-x-moz-reference:
+  unchanged         1
+  unchanged_w       1
+  0% of entries changed
+  $ git add .
+  $ git commit -qm'c0'
+  $ git log -n1 --format='%H'
+  8fe4596cb5611b0c8a805f9d20a7741a29c26140
+  $ cd ../../..
+
+Add single-android to config
+  $ cd target
+  $ cat >> config.toml << EOF
+  > 
+  > [[repo]]
+  > org = "gh1"
+  > name = "single-android"
+  > branch = "master"
+  > EOF
+  $ git add .
+  $ git commit -qm'Add single-android'
+  $ git log -n1 --format='%H'
+  8a1464065554fae6c6518ef6e2f709400137ad66
+  $ cd ..
+
+Convert to target
+  $ python -mmozxchannel.git.process --repo gh1/single-android --pull target
+
+Validate some of the results
+  $ cd target
+  $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
+  37517a977b2aab1d41635d6f251c8c5d9a0b21ff c0
+  X-Channel-Revision: [master] gh1/android1@1d91a5bb326114cf1876450fe0f4a5586e1a1927
+  X-Channel-Revision: [master] gh1/android2@d50c15729413735daea8a7148d8c761dd44bb6a2
+  X-Channel-Converted-Revision: [master] gh1/single-android@8fe4596cb5611b0c8a805f9d20a7741a29c26140
+  
+  8a1464065554fae6c6518ef6e2f709400137ad66 Add single-android
+  
+  $ compare-locales -qq l10n.toml .
+  de:
+  missing           4
+  missing_w         4
+  0% of entries changed
+  fr:
+  missing           1
+  missing_w         1
+  0% of entries changed
+  he:
+  missing           3
+  missing_w         3
+  0% of entries changed
+  sr-Cyrl:
+  missing           3
+  missing_w         3
+  0% of entries changed
+  zh-TW:
+  missing           1
+  missing_w         1
+  0% of entries changed

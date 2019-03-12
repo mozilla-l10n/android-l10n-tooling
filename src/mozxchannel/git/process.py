@@ -14,13 +14,13 @@ from mozxchannel.git.repository import (
 )
 
 
-def handle(target, target_branch, pull=False):
+def handle(target, target_branch, repos_to_iterate, pull=False):
     graph = CommitsGraph(target, target_branch)
     graph.loadConfigs()
     if pull:
         graph.pull()
     graph.loadRevs()
-    graph.gather()
+    graph.gather(repos_to_iterate)
     return graph
 
 
@@ -76,9 +76,12 @@ class CommitsGraph:
         for repo in self.repos:
             repo.pull()
 
-    def gather(self):
+    def gather(self, repos_to_iterate):
         for repo in self.repos:
-            self.gather_repo(repo)
+            process_revisions = not (
+                repos_to_iterate and repo.name not in repos_to_iterate
+            )
+            self.gather_repo(repo, process_revisions)
         # We have added parents outside of commit range.
         # Find and remove them.
         for commit in list(self.children.keys()):
@@ -87,7 +90,7 @@ class CommitsGraph:
                 for child in children:
                     self.parents[child].remove(commit)
 
-    def gather_repo(self, repo):
+    def gather_repo(self, repo, process_revisions):
         basepath = repo.path
         pc = TOMLParser().parse(mozpath.join(basepath, "l10n.toml"))
         paths = ["l10n.toml"] + [
@@ -101,6 +104,8 @@ class CommitsGraph:
         branches = repo.branches()
         self.branches[repo.name] = branches[:]
         known_revs = self.revs.get(repo.name, {})
+        if not process_revisions:
+            return
         for branch_num in range(len(branches)):
             branch = branches[branch_num]
             prior_branches = branches[:branch_num]
@@ -285,9 +290,10 @@ class CommitWalker(walker.GraphWalker):
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--pull", action="store_true")
+    p.add_argument("--repo", nargs="*")
     p.add_argument("target")
     p.add_argument("--branch", default="master")
     args = p.parse_args()
-    graph = handle(args.target, args.branch, pull=args.pull)
+    graph = handle(args.target, args.branch, args.repo, pull=args.pull)
     echo = CommitWalker(graph, args.branch)
     echo.walkGraph()
