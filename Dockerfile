@@ -13,6 +13,8 @@ RUN find /usr/local/lib/python3.7/site-packages/ -name \*.so
 # create pygit2 runtime binaries
 RUN python3 -c 'import pygit2'
 RUN find /usr/local/lib/python3.7/site-packages/ -name \*.so
+COPY . /src/android-l10n-tooling
+RUN pip3 install /src/android-l10n-tooling
 
 FROM python:3.7-slim-stretch
 WORKDIR /workdir/

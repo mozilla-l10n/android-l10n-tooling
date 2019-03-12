@@ -1,5 +1,6 @@
 import argparse
 from collections import defaultdict
+import json
 import os
 import subprocess
 
@@ -230,6 +231,7 @@ class CommitWalker(walker.GraphWalker):
                     other_rev,
                 )
         self.createWorkdir(contents)
+        self.createMeta(repo, self.revs[repo.name])
         self.graph.target.git.index.add_all()
         self.graph.target.git.index.write()
         tree_id = self.graph.target.git.index.write_tree()
@@ -286,6 +288,18 @@ class CommitWalker(walker.GraphWalker):
     path = "{}"
 """.format(include))
 
+    def createMeta(self, repo, revs):
+        workdir = os.path.join(self.graph.target.git.workdir, '_meta')
+        if not os.path.isdir(workdir):
+            os.makedirs(workdir)
+        metafile = os.path.join(workdir, repo.name.replace('/', '-') + '.json')
+        meta = {
+            "name": repo.name,
+            "revs": revs
+        }
+        with open(metafile, 'w') as fh:
+            json.dump(meta, fh, sort_keys=True, indent=2)
+        
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
