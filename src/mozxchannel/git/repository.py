@@ -1,6 +1,5 @@
-from collections import defaultdict
+import json
 import os
-import re
 import subprocess
 import pygit2
 import pytoml as toml
@@ -41,6 +40,16 @@ class Repository(object):
             ]
         subprocess.run(cmd)
 
+    def ensure_branch(self, branch_name):
+        if self.git.lookup_branch(branch_name) is not None:
+            return
+        # Expected branch doesn't exist, branch HEAD
+        self.git.branches.local.create(branch_name, self[self.git.head.target])
+
+    def checkout(self, branch_name):
+        b = self.git.lookup_branch(branch_name)
+        self.git.checkout(b.name)
+
 
 class SourceRepository(Repository):
     def __init__(self, config, root=None):
@@ -72,7 +81,6 @@ class SourceRepository(Repository):
         # but fall back to local branch
         return self.git.lookup_branch(branch_name)
 
-
     def ref(self, branch_name):
         # fall back to local branch
         self._ref_cache[branch_name] = branch_name
@@ -85,31 +93,27 @@ class SourceRepository(Repository):
         return self._ref_cache[branch_name]
 
 
-CHANNEL_REVS = re.compile(
-    "^X-Channel-(?:Converted-)?Revision: "
-    "\[(?P<branch>.+?)\] (?P<repo>[^@\n]*?)@(?P<rev>[a-f0-9]{40})$",
-    re.M,
-)
-
-
 class TargetRepository(Repository):
     def __init__(self, path, branch):
         super().__init__(path)
         self.target_branch = branch
+        self.ensure_branch(branch)
+        self.checkout(branch)
 
     def converted_revs(self):
         branch = self.git.lookup_branch(self.target_branch).target
-        walker = self.git.walk(branch, pygit2.GIT_SORT_TOPOLOGICAL)
-        for commit in walker:
-            revs = defaultdict(dict)
-            for m in CHANNEL_REVS.finditer(commit.message):
-                revs[m.group("repo")][m.group("branch")] = m.group("rev")
-            if revs:
-                yield revs
+        tree = self[branch].tree
+        if '_meta' not in tree:
+            return {}
+        tree = self[tree['_meta'].id]
+        revs = {}
+        for treeitem in tree:
+            data = json.loads(self[treeitem.id].data)
+            revs[data['name']] = data['revs']
+        return revs
 
     def known_revs(self):
         revs = set()
-        for rev in self.converted_revs():
-            for branch_revs in rev.values():
-                revs.update(branch_revs.values())
+        for branch_revs in self.converted_revs().values():
+            revs.update(branch_revs.values())
         return revs

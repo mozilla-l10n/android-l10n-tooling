@@ -43,10 +43,7 @@ class CommitsGraph:
         self.revs = {}
 
     def loadRevs(self):
-        revs = {}
-        for _r in self.target.converted_revs():
-            revs.update(_r)
-            break
+        revs = self.target.converted_revs()
         for repo in self.repos:
             repo_name = repo.name
             self.revs[repo_name] = {}
@@ -299,7 +296,7 @@ class CommitWalker(walker.GraphWalker):
         }
         with open(metafile, 'w') as fh:
             json.dump(meta, fh, sort_keys=True, indent=2)
-        
+
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
