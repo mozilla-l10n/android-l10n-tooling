@@ -298,7 +298,7 @@ class CommitWalker(walker.GraphWalker):
             json.dump(meta, fh, sort_keys=True, indent=2)
 
 
-if __name__ == "__main__":
+def main():
     p = argparse.ArgumentParser()
     p.add_argument("--pull", action="store_true")
     p.add_argument("--repo", nargs="*")
@@ -308,3 +308,7 @@ if __name__ == "__main__":
     graph = handle(args.target, args.branch, args.repo, pull=args.pull)
     echo = CommitWalker(graph, args.branch)
     echo.walkGraph()
+
+
+if __name__ == "__main__":
+    main()
