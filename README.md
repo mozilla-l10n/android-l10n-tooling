@@ -1,5 +1,4 @@
-Android l10n tooling
-====================
+# Android l10n tooling
 
 This repository hosts code to create and maintain the android-l10n repository.
 It provides both cross-product and cross-branch strings, joining the
@@ -12,6 +11,11 @@ inside a docker container.
 ```sh
 docker build -t android-l10n-tooling .
 ```
+
+## Exporting
+
+This is the process to transfer strings from the Android project repositories
+onto the `android-l10n` strings-only repository.
 
 Outside of the container, you want to have the `android-l10n` repository.
 There you should make manual git changes, like changes to the `config.toml`
@@ -43,3 +47,26 @@ If you'd like to check the result of the conversion for a local repository
 state of yours, you want to modify the `branch` in `config.toml`, and mount
 your local clone to `/workdir/mozilla-mobile/android-components` when starting
 the docker container.
+
+## Importing
+
+This is the process to get strings from the `android-l10n` strings-only
+repository back into the Android project repositories. These commands
+are run in the same docker container as for exporting.
+
+Outside of the container, you want to have your project repository, and
+mount that while running the command. Same goes for the `android-l10n`
+repository.
+
+Then, inside the container, you run
+
+```sh
+import-android-l10n android-l10n/mozilla-mobile/android-components/l10n.toml mozilla-mobile/android-components
+```
+
+The first argument is the `l10n.toml` for the project as it lives inside
+`android-l10n`. The second argument is the path to the local checkout of the
+project repository.
+
+This command doesn't do anything related to git, so you want to check out a 
+git branch before running it, and add/commit afterwards.

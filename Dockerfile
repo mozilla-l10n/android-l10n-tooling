@@ -27,6 +27,7 @@ RUN apt-get install -y git
 COPY --from=builder /usr/local/lib/python3.7/site-packages/ /usr/local/lib/python3.7/site-packages/
 COPY --from=builder /usr/local/bin/compare-locales /usr/local/bin/compare-locales
 COPY --from=builder /usr/local/bin/create-l10n-branch /usr/local/bin/create-l10n-branch
+COPY --from=builder /usr/local/bin/import-android-l10n /usr/local/bin/import-android-l10n
 
 RUN groupadd --gid 10001 app && useradd -g app --uid 10001 --shell /usr/sbin/nologin app
 RUN chown app:app /workdir
