@@ -67,7 +67,10 @@ class SourceRepository(Repository):
 
     def branches(self):
         rev = self.lookup_branch(self.branch).target
-        toml_data = self[self[rev].tree['l10n.toml'].id].data
+        tree = self[rev].tree
+        if 'l10n.toml' not in tree:
+            return [self.branch]
+        toml_data = self[tree['l10n.toml'].id].data
         config = toml.loads(toml_data)
         return config.get("branches", [self.branch])
 

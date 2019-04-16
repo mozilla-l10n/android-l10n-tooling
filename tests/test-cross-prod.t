@@ -42,7 +42,7 @@ Convert to target
 Validate some of the results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
-  f12737a0296e18536718ee1203ba7e8a1d3e3dff c0
+  1122659e4dcf80220a90c1c12c829809c976da42 c0
   X-Channel-Converted-Revision: [master] gh1/android1@a5643d6afc7bad7e741991d4fcc935146ee27e72
   
   $ target_rev
@@ -94,11 +94,11 @@ Convert to target
 Validate some of the results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
-  070ce48b0e909bc6446acb11023d5eb5a642361c c11
+  d804a27d767a64d05e38a1245239234a0ed8afc9 c11
   X-Channel-Converted-Revision: [master] gh1/android1@1d91a5bb326114cf1876450fe0f4a5586e1a1927
   X-Channel-Revision: [master] gh1/android2@d50c15729413735daea8a7148d8c761dd44bb6a2
   
-  b7cb505fa5f244e2b8f7481915b8184e6ecfa3f3 c21
+  6c76c92e77fcca3311e640a631c02df460dae41e c21
   X-Channel-Revision: [master] gh1/android1@a5643d6afc7bad7e741991d4fcc935146ee27e72
   X-Channel-Converted-Revision: [master] gh1/android2@d50c15729413735daea8a7148d8c761dd44bb6a2
   
@@ -134,7 +134,7 @@ Add single-android to config
   $ git add .
   $ git commit -qm'Add single-android'
   $ git log -n1 --format='%H'
-  aa0aa0dc90b30114f4919024d12623438bb48845
+  72bc0112d0616f59d3d79fd76a932fe8bb3ea315
   $ cd ..
 
 Convert to target
@@ -143,12 +143,12 @@ Convert to target
 Validate some of the results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
-  08d2ada5814af6964379db0df5fc2d5c5afff15c c0
+  d5a31d1505700862d616b6e45acbace8fee2b0f6 c0
   X-Channel-Revision: [master] gh1/android1@1d91a5bb326114cf1876450fe0f4a5586e1a1927
   X-Channel-Revision: [master] gh1/android2@d50c15729413735daea8a7148d8c761dd44bb6a2
   X-Channel-Converted-Revision: [master] gh1/single-android@8fe4596cb5611b0c8a805f9d20a7741a29c26140
   
-  aa0aa0dc90b30114f4919024d12623438bb48845 Add single-android
+  72bc0112d0616f59d3d79fd76a932fe8bb3ea315 Add single-android
   
   $ compare-locales -qq l10n.toml .
   de:

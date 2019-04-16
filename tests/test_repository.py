@@ -9,6 +9,12 @@ from mozxchannel.git import repository
 class TestRepository(TestCase):
     def setUp(self):
         self.workdir = tempfile.mkdtemp()
+        env = {
+            "GIT_AUTHOR_NAME": "Jane Doe",
+            "GIT_AUTHOR_EMAIL": "Jane@example.tld",
+            "GIT_COMMITTER_NAME": "Jane Doe",
+            "GIT_COMMITTER_EMAIL": "Jane@example.tld",
+        }
         for cmd in [
             ["git", "init"],
             "some content",
@@ -21,8 +27,10 @@ class TestRepository(TestCase):
                 with open(os.path.join(self.workdir, "file"), "w") as fh:
                     fh.write(cmd + "\n")
             else:
-                subprocess.run(cmd, cwd=self.workdir, capture_output=True)
-        print('yeah')
+                subprocess.run(
+                    cmd,
+                    cwd=self.workdir, capture_output=True, env=env
+                )
 
     def tearDown(self):
         shutil.rmtree(self.workdir)

@@ -16,17 +16,17 @@ from mozxchannel.git.repository import (
 
 
 def handle(target, target_branch, repos_to_iterate, pull=False):
-    graph = CommitsGraph(target, target_branch)
+    graph = CommitsGraph(target, target_branch, repos_to_iterate)
     graph.loadConfigs()
     if pull:
         graph.pull()
     graph.loadRevs()
-    graph.gather(repos_to_iterate)
+    graph.gather()
     return graph
 
 
 class CommitsGraph:
-    def __init__(self, target, branch, source=None):
+    def __init__(self, target, branch, repos_to_iterate, source=None):
         self.config = None
         self.repos = None
         self.source = source
@@ -40,6 +40,8 @@ class CommitsGraph:
         self.children = defaultdict(set)
         self.target = TargetRepository(target, branch)
         self.target_branch = branch
+        self.repos_to_iterate = repos_to_iterate
+        self.repos_to_pull = None
         self.revs = {}
 
     def loadRevs(self):
@@ -48,6 +50,12 @@ class CommitsGraph:
             repo_name = repo.name
             self.revs[repo_name] = {}
             if repo_name not in revs:
+                continue
+            if (
+                self.repos_to_iterate
+                and repo_name not in self.repos_to_iterate
+            ):
+                self.revs[repo_name].update(revs[repo_name])
                 continue
             for n, branch in enumerate(repo.branches()):
                 if branch in revs[repo_name]:
@@ -69,17 +77,29 @@ class CommitsGraph:
             SourceRepository(config, root=self.source)
             for config in repo_configs
         ]
+        if not self.repos_to_iterate:
+            self.repos_to_pull = self.repos
+            return
+        hot_targets = {
+            repo.target_root
+            for repo in self.repos
+            if repo.name in self.repos_to_iterate
+        }
+        self.repos_to_pull = [
+            repo for repo in self.repos if repo.target_root in hot_targets
+        ]
 
     def pull(self):
-        for repo in self.repos:
+        for repo in self.repos_to_pull:
             repo.pull()
 
-    def gather(self, repos_to_iterate):
+    def gather(self):
         for repo in self.repos:
-            process_revisions = not (
-                repos_to_iterate and repo.name not in repos_to_iterate
-            )
-            self.gather_repo(repo, process_revisions)
+            if not (
+                self.repos_to_iterate
+                and repo.name not in self.repos_to_iterate
+            ):
+                self.gather_repo(repo)
         # We have added parents outside of commit range.
         # Find and remove them.
         for commit in list(self.children.keys()):
@@ -88,7 +108,7 @@ class CommitsGraph:
                 for child in children:
                     self.parents[child].remove(commit)
 
-    def gather_repo(self, repo, process_revisions):
+    def gather_repo(self, repo):
         basepath = repo.path
         pc = TOMLParser().parse(mozpath.join(basepath, "l10n.toml"))
         paths = ["l10n.toml"] + [
@@ -102,8 +122,6 @@ class CommitsGraph:
         branches = repo.branches()
         self.branches[repo.name] = branches[:]
         known_revs = self.revs.get(repo.name, {})
-        if not process_revisions:
-            return
         for branch_num in range(len(branches)):
             branch = branches[branch_num]
             prior_branches = branches[:branch_num]
@@ -206,19 +224,12 @@ class CommitWalker(walker.GraphWalker):
         contents = defaultdict(list)
         for other_repo in self.graph.repos:
             other_revs = self.revs[other_repo.name]
-            paths = self.graph.paths_for_repos[other_repo.name]
-            other_branches = self.graph.branches[other_repo.name]
+            paths = self.graph.paths_for_repos.get(other_repo.name)
+            other_branches = self.graph.branches.get(other_repo.name, other_revs.keys())
             for other_branch in other_branches:
                 if other_branch not in other_revs:
                     continue
                 other_rev = other_revs[other_branch]
-                other_commit = other_repo[other_rev]
-                for p in paths:
-                    if p in other_commit.tree:
-                        target_path = mozpath.join(other_repo.target_root, p)
-                        contents[target_path].append(
-                            other_repo[other_commit.tree[p].id].data
-                        )
                 message += "X-Channel{}-Revision: [{}] {}@{}\n".format(
                     "-Converted"
                     if other_repo.name == repo.name and other_branch == branch
@@ -227,6 +238,15 @@ class CommitWalker(walker.GraphWalker):
                     other_repo.name,
                     other_rev,
                 )
+                if not paths:
+                    continue
+                other_commit = other_repo[other_rev]
+                for p in paths:
+                    if p in other_commit.tree:
+                        target_path = mozpath.join(other_repo.target_root, p)
+                        contents[target_path].append(
+                            other_repo[other_commit.tree[p].id].data
+                        )
         self.createWorkdir(contents)
         self.createMeta(repo, self.revs[repo.name])
         self.graph.target.git.index.add_all()
@@ -246,41 +266,29 @@ class CommitWalker(walker.GraphWalker):
 
     def createWorkdir(self, contents):
         workdir = self.graph.target.git.workdir
-        locales = set()
-        includes = []
         for tpath, content_list in contents.items():
             try:
                 b_content = merge_channels(tpath, content_list)
             except MergeNotSupportedError:
                 b_content = content_list[0]
-            if tpath.endswith("l10n.toml"):
-                try:
-                    data = toml.loads(b_content)
-                    if 'locales' in data:
-                        locales.update(data['locales'])
-                    includes.append(tpath)
-                except Exception as e:
-                    print(e)
-                    pass
             tpath = mozpath.join(workdir, tpath)
             tdir = mozpath.dirname(tpath)
             if not os.path.isdir(tdir):
                 os.makedirs(tdir)
             with open(tpath, "wb") as fh:
                 fh.write(b_content)
-        self.ensureL10nToml(workdir, locales, includes)
+        self.ensureL10nToml(workdir)
 
-    def ensureL10nToml(self, workdir, locales, includes):
-        locales = sorted(locales)
-        includes.sort()
+    def ensureL10nToml(self, workdir):
+        includes = {
+            '{}/l10n.toml'.format(repo.target_root)
+            for repo in self.graph.repos
+        }
+        includes = sorted(includes)
         with open(os.path.join(workdir, "l10n.toml"), "w") as l10n_toml:
-            l10n_toml.write("basepath = \".\"\n\n")
-            l10n_toml.write("locales = [\n")
-            for locale in locales:
-                l10n_toml.write("  \"{}\",\n".format(locale))
-            l10n_toml.write("]\n\n")
+            l10n_toml.write("basepath = \".\"\n")
             for include in includes:
-                l10n_toml.write("""\
+                l10n_toml.write("""
 [[includes]]
     path = "{}"
 """.format(include))

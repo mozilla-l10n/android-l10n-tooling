@@ -7,8 +7,8 @@ RUN apt-get -t stretch-backports install -y libgit2-27 libgit2-dev
 # pygit2 needs to write binaries after install time
 RUN apt-get install -y gcc
 RUN pip3 install -U pip
-RUN pip3 install pygit2==0.27.3
-RUN pip3 install compare-locales==5.1.0
+RUN pip3 install pygit2==0.27.4
+RUN pip3 install compare-locales==7.1.1
 RUN find /usr/local/lib/python3.7/site-packages/ -name \*.so
 # create pygit2 runtime binaries
 RUN python3 -c 'import pygit2'

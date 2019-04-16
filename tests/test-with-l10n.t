@@ -41,7 +41,7 @@ Convert to target quarantine
 Validate some of the results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV a1-q
-  6783f445b84f77073a48f8c8382306b2911323ca a1-c0
+  ac9a4d8ec3124c0344a188893bc08d8cb76733d6 a1-c0
   X-Channel-Converted-Revision: [master] gh1/android1@9cc0ec22e2f8085665c2297e3f76da1c6a80be11
   
   $ git checkout master
@@ -52,7 +52,7 @@ Merge a1 into master
   $ git merge --no-ff -q -m'Merge android1 quarantine' a1-q
   $ git branch -qd a1-q
   $ git log -n1 --format='%H %s%n%b'
-  2b63a7aa0f4694c972cdc839384c5bb06b43deea Merge android1 quarantine
+  c98ed99762562f0e2f846a60d0ee461e2635ed1e Merge android1 quarantine
   
   $ target_rev
 
@@ -67,7 +67,7 @@ Add config for second repo to target
   $ git add config.toml
   $ git commit -qm'add android2'
   $ git log  --format='%H %s%n%b'  $PREVIOUS_TARGET_REV master
-  92f21713ffbc7097723ebd6cc0ef7c9046542b12 add android2
+  1f1a143c0cc819e8c77c098a1784c05224caa5f2 add android2
   
   $ target_rev
 
@@ -97,7 +97,7 @@ Convert to target
 Validate some of the results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV a2-q
-  2868ac46cdfb110fb11bd8ef2436b7eafdd7ffd1 a2-c0
+  50127005184bfb0394b07fb917c891c9710b16da a2-c0
   X-Channel-Revision: [master] gh1/android1@9cc0ec22e2f8085665c2297e3f76da1c6a80be11
   X-Channel-Converted-Revision: [master] gh1/android2@35b1a6a9cbfd7573ab34c81a697ba752f78d34e2
   
@@ -114,7 +114,7 @@ Merge a2 into master
   $ git merge --no-ff -q -m'Merge android2 quarantine' a2-q
   $ git branch -qd a2-q
   $ git log -n1 --format='%H %s%n%b'
-  7e910b69cef1d4c50175b5789c80eea671008618 Merge android2 quarantine
+  c5da0ed22c8560d5937443672f8dae6f15a1d032 Merge android2 quarantine
   
 
   $ cd ..

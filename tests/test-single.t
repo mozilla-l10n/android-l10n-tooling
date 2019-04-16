@@ -41,7 +41,7 @@ Convert to target
 Validate some of the results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
-  9d7683c09d7d261d1a490ed0f34a388bd1c41faf c0
+  2c64ce4712e30d4169adcd92dc04a44b126c3a9d c0
   X-Channel-Converted-Revision: [master] gh1/android1@a5643d6afc7bad7e741991d4fcc935146ee27e72
   
   $ target_rev
@@ -70,7 +70,7 @@ Convert to target
 Validate new results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV master
-  e86b69c786de9564f3c2ab19d6d0e56fbcc2e8ad c2
+  16f596c35608460113a2edd0ea367e848873b25f c2
   X-Channel-Converted-Revision: [master] gh1/android1@5786f17160793278f5aa226ddfdbb1f770deb008
   
   $ target_rev
@@ -98,7 +98,7 @@ Convert to target
 Validate new results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV quarantine
-  e05d798be9447297bed0b886d93986fd3494fc8b c3
+  c6649d7a4ecf60375e89131e6d440ac67913e2ee c3
   X-Channel-Converted-Revision: [master] gh1/android1@16fa5cc02f003ee888c2f4d5d5b3b2bd56de01c5
   
   $ target_rev
@@ -108,8 +108,8 @@ Merge quarantine
   $ git merge -q quarantine
   $ git checkout -q quarantine
   $ git branch -v
-    master     e05d798 c3
-  * quarantine e05d798 c3
+    master     c6649d7 c3
+  * quarantine c6649d7 c3
   $ cd ..
 
 Add a release fork
@@ -138,11 +138,11 @@ Convert to target
 Validate new results
   $ cd target
   $ git log  --format='%H %s%n%b' $PREVIOUS_TARGET_REV quarantine
-  18f3751f88fd1f3064dac2bb6b9e1925a5ccc591 Add release
+  8cf595b7404e422b08aaea53d3290b453a2ef783 Add release
   X-Channel-Converted-Revision: [master] gh1/android1@3019e75148c22667de4241888dbf327cba1f0488
   X-Channel-Revision: [release] gh1/android1@5786f17160793278f5aa226ddfdbb1f770deb008
   
-  227e21437653cfab2c16d3434495a9209fe216fb c4
+  a5ad84a0e638aa5c58158fc5779ed7859b4fab6f c4
   X-Channel-Converted-Revision: [master] gh1/android1@8e8adde7fb54427b9585415cd424923c25c7a18a
   
   $ cd ..
@@ -164,39 +164,39 @@ Batch convert to new target
 Validate batched results
   $ diff -x .git -qr target batched-target
   $ git -C target log --format='%H %s%n%b'
-  18f3751f88fd1f3064dac2bb6b9e1925a5ccc591 Add release
+  8cf595b7404e422b08aaea53d3290b453a2ef783 Add release
   X-Channel-Converted-Revision: [master] gh1/android1@3019e75148c22667de4241888dbf327cba1f0488
   X-Channel-Revision: [release] gh1/android1@5786f17160793278f5aa226ddfdbb1f770deb008
   
-  227e21437653cfab2c16d3434495a9209fe216fb c4
+  a5ad84a0e638aa5c58158fc5779ed7859b4fab6f c4
   X-Channel-Converted-Revision: [master] gh1/android1@8e8adde7fb54427b9585415cd424923c25c7a18a
   
-  e05d798be9447297bed0b886d93986fd3494fc8b c3
+  c6649d7a4ecf60375e89131e6d440ac67913e2ee c3
   X-Channel-Converted-Revision: [master] gh1/android1@16fa5cc02f003ee888c2f4d5d5b3b2bd56de01c5
   
-  e86b69c786de9564f3c2ab19d6d0e56fbcc2e8ad c2
+  16f596c35608460113a2edd0ea367e848873b25f c2
   X-Channel-Converted-Revision: [master] gh1/android1@5786f17160793278f5aa226ddfdbb1f770deb008
   
-  9d7683c09d7d261d1a490ed0f34a388bd1c41faf c0
+  2c64ce4712e30d4169adcd92dc04a44b126c3a9d c0
   X-Channel-Converted-Revision: [master] gh1/android1@a5643d6afc7bad7e741991d4fcc935146ee27e72
   
   aafc5e0cb34ba3c6c5fc70f001f60e8320a1c153 Initial config
   
   $ git -C batched-target log --format='%H %s%n%b'
-  18f3751f88fd1f3064dac2bb6b9e1925a5ccc591 Add release
+  8cf595b7404e422b08aaea53d3290b453a2ef783 Add release
   X-Channel-Converted-Revision: [master] gh1/android1@3019e75148c22667de4241888dbf327cba1f0488
   X-Channel-Revision: [release] gh1/android1@5786f17160793278f5aa226ddfdbb1f770deb008
   
-  227e21437653cfab2c16d3434495a9209fe216fb c4
+  a5ad84a0e638aa5c58158fc5779ed7859b4fab6f c4
   X-Channel-Converted-Revision: [master] gh1/android1@8e8adde7fb54427b9585415cd424923c25c7a18a
   
-  e05d798be9447297bed0b886d93986fd3494fc8b c3
+  c6649d7a4ecf60375e89131e6d440ac67913e2ee c3
   X-Channel-Converted-Revision: [master] gh1/android1@16fa5cc02f003ee888c2f4d5d5b3b2bd56de01c5
   
-  e86b69c786de9564f3c2ab19d6d0e56fbcc2e8ad c2
+  16f596c35608460113a2edd0ea367e848873b25f c2
   X-Channel-Converted-Revision: [master] gh1/android1@5786f17160793278f5aa226ddfdbb1f770deb008
   
-  9d7683c09d7d261d1a490ed0f34a388bd1c41faf c0
+  2c64ce4712e30d4169adcd92dc04a44b126c3a9d c0
   X-Channel-Converted-Revision: [master] gh1/android1@a5643d6afc7bad7e741991d4fcc935146ee27e72
   
   aafc5e0cb34ba3c6c5fc70f001f60e8320a1c153 Initial config
