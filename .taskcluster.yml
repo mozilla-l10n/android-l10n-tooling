@@ -1,4 +1,26 @@
 version: 1
 policy:
   pullRequests: public
-tasks: []
+tasks:
+  $match:
+    'true':
+      taskId:
+        $eval: as_slugid("pr_task")
+      provisionerId: aws-provisioner-v1
+      workerType: github-worker
+      deadline: {$fromNow: '1 day'}
+      payload:
+        maxRunTime: 3600
+        image: python:3.7
+        command:
+          - /bin/bash
+          - '--login'
+          - '-c'
+          - >-
+            git clone {{event.head.repo.url}} repo && cd repo && git config
+            advice.detachedHead false && git checkout {{event.head.sha}} && python setup.py test
+      metadata:
+        name: ''
+        description: ''
+        owner: '${event.sender.login}@users.noreply.github.com'
+        source: '${event.repository.url}'
