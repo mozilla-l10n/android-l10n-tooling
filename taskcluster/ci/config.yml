@@ -1,0 +1,26 @@
+---
+trust-domain: l10n
+treeherder:
+    group-names:
+        'I': 'Docker Image Builds'
+
+task-priority: lowest
+
+taskgraph:
+    repositories:
+        tools:
+            name: "Android L10n Tooling"
+    cached-task-prefix: l10n.android-l10n-tooling
+
+workers:
+    aliases:
+        linux:
+            provisioner: aws-provisioner-v1
+            implementation: docker-worker
+            os: linux
+            worker-type: 'l10n-{level}-linux'
+        images:
+            provisioner: aws-provisioner-v1
+            implementation: docker-worker
+            os: linux
+            worker-type: 'l10n-{level}-images'
