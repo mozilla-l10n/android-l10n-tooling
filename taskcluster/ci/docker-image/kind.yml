@@ -17,3 +17,5 @@ transforms:
 # knowledge that unnecessary images will be omitted from the target task graph
 jobs:
     base: {}
+    l10n:
+        parent: base
