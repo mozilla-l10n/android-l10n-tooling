@@ -14,5 +14,9 @@ setup(
     ),
     tests_require=[
         "cram",
-    ]
+    ],
+    install_requires=[
+        'pygit2~=0.28.2',
+        'compare-locales==7.1.1',
+    ],
 )

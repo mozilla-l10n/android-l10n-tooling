@@ -1,0 +1,30 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+---
+
+loader: taskgraph.loader.transform:loader
+
+transforms:
+    - taskgraph.transforms.job:transforms
+    - taskgraph.transforms.task:transforms
+
+job-defaults:
+    attributes: {}
+    worker-type: linux
+    worker:
+        docker-image: {in-tree: base}
+        max-run-time: 3600
+    run:
+        using: run-task
+        cwd: '{checkout}'
+        cache-dotcache: true
+
+jobs:
+    unit:
+        description: "Run `unit tests` to validate the latest changes"
+        run:
+            command: >-
+                pip install --user . pytest cram &&
+                py.test tests
+
