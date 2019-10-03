@@ -6,28 +6,26 @@
 loader: taskgraph.loader.transform:loader
 
 transforms:
+    - l10n_taskgraph.update:transforms
     - taskgraph.transforms.job:transforms
     - taskgraph.transforms.task:transforms
 
 job-defaults:
     attributes: {}
+    description: "Update android-l10n with changes from {project}"
     worker-type: linux
     worker:
-        docker-image: {in-tree: base}
+        docker-image: {in-tree: l10n}
         max-run-time: 3600
     run:
         using: run-task
-        checkout:
-            tooling:
-                path: ''
         cwd: '{checkout}'
-        cache-dotcache: true
+        checkout:
+            l10n:
+                path: android-l10n
+        command: ['create-l10n-branch', '--repo', '{project}', '--branch', '{repo_name}-quarantine', 'android-l10n']
 
 jobs:
-    unit:
-        description: "Run `unit tests` to validate the latest changes"
-        run:
-            command: >-
-                pip install --user . pytest cram &&
-                py.test tests
+    mozilla-mobile/fenix:
+        repo-prefix: fenix
 

@@ -8,8 +8,24 @@ task-priority: lowest
 
 taskgraph:
     repositories:
-        tools:
+        tooling:
             name: "Android L10n Tooling"
+            project-regex: android-l10n-tooling
+            default-repository: https://github.com/mozilla-l10n/android-l10n-tooling
+            default-ref: master
+            type: git
+        l10n:
+            name: "Android L10n"
+            project-regex: android-l10n$
+            default-repository: https://github.com/mozilla-l10n/android-l10n
+            default-ref: master
+            type: git
+        fenix:
+            name: "Fenix"
+            project-regex: fenix
+            default-repository: https://github.com/mozilla-mobile/fenix
+            default-ref: master
+            type: git
     cached-task-prefix: l10n.android-l10n-tooling
 
 workers:

@@ -6,28 +6,27 @@
 loader: taskgraph.loader.transform:loader
 
 transforms:
+    - l10n_taskgraph.update:transforms
     - taskgraph.transforms.job:transforms
     - taskgraph.transforms.task:transforms
 
 job-defaults:
     attributes: {}
+    description: "Update {project} with translations."
     worker-type: linux
     worker:
-        docker-image: {in-tree: base}
+        docker-image: {in-tree: l10n}
         max-run-time: 3600
+        env:
+            GITHUB_TOKEN_SECRET_NAME: l10n/automation-bot/token
     run:
         using: run-task
-        checkout:
-            tooling:
-                path: ''
         cwd: '{checkout}'
-        cache-dotcache: true
+        checkout:
+            l10n:
+                path: android-l10n
+        command: ['import-android-l10n', 'android-l10n/{project}/l10n.toml', '{project}']
 
 jobs:
-    unit:
-        description: "Run `unit tests` to validate the latest changes"
-        run:
-            command: >-
-                pip install --user . pytest cram &&
-                py.test tests
-
+    mozilla-mobile/fenix:
+        repo-prefix: fenix
