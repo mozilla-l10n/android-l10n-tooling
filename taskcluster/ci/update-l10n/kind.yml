@@ -17,17 +17,19 @@ job-defaults:
         max-run-time: 3600
     run:
         using: run-task
-        checkout:
-            tools:
-                path: ''
         cwd: '{checkout}'
         cache-dotcache: true
+        checkout:
+            l10n:
+                path: android-l10n
 
 jobs:
-    unit:
-        description: "Run `unit tests` to validate the latest changes"
+    reference-browser:
+        description: ""
         run:
-            command: >-
-                pip install --user . pytest cram &&
-                py.test tests
+            checkout:
+                rb:
+                    path: mozilla-mobile/android-l10n
 
+            command:
+                create-l10n-branch --push ssh://github.com/Callek-bot/android-l10n --repo mozilla-mobile/android-components --branch android-components-quarantine android-l10n

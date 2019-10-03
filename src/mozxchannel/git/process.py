@@ -306,9 +306,22 @@ class CommitWalker(walker.GraphWalker):
             json.dump(meta, fh, sort_keys=True, indent=2)
 
 
+def push(target, branch, dest):
+    cmd = [
+        "git",
+        "-C",
+        target,
+        "push",
+        dest,
+        "+{}:{}".format(branch, branch),
+    ]
+    subprocess.run(cmd)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--pull", action="store_true")
+    p.add_argument("--push", optional=True)
     p.add_argument("--repo", nargs="*")
     p.add_argument("target")
     p.add_argument("--branch", default="master")
@@ -316,6 +329,8 @@ def main():
     graph = handle(args.target, args.branch, args.repo, pull=args.pull)
     echo = CommitWalker(graph, args.branch)
     echo.walkGraph()
+    if args.push:
+        push(args.target, args.branch, destination=args.push)
 
 
 if __name__ == "__main__":

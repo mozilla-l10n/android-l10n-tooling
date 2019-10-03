@@ -10,6 +10,22 @@ taskgraph:
     repositories:
         tools:
             name: "Android L10n Tooling"
+            project-regex: android-l10n-tools
+            default-repository: https://github.com/mozilla-l10n/android-l10n-tools
+            default-ref: master
+            type: git
+        l10n:
+            name: "Android L10n"
+            project-regex: android-l10n
+            default-repository: https://github.com/mozilla-l10n/android-l10n
+            default-ref: master
+            type: git
+        rb:
+            name: "Reference Browser"
+            project-regex: reference-browser
+            default-repository: https://github.com/mozilla-mobile/reference-browser
+            default-ref: master
+            type: git
     cached-task-prefix: l10n.android-l10n-tooling
 
 workers:
