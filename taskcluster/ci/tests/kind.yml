@@ -34,3 +34,10 @@ jobs:
             command: >-
                 pip install --user black &&
                 black --diff --check .
+
+    flake8:
+        description: "Run flake8."
+        run:
+            command: >-
+                pip install --user flake8 &&
+                flake8 .
