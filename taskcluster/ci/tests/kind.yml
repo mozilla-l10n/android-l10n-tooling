@@ -28,3 +28,9 @@ jobs:
                 pip install --user . pytest cram &&
                 py.test tests
 
+    black:
+        description: "Run black."
+        run:
+            command: >-
+                pip install --user black &&
+                black --diff --check .

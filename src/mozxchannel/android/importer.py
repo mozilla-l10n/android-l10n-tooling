@@ -6,8 +6,8 @@ from compare_locales.paths import TOMLParser
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('l10n_toml', help='l10n.toml with localizations')
-    parser.add_argument('dest', help='Destination repository')
+    parser.add_argument("l10n_toml", help="l10n.toml with localizations")
+    parser.add_argument("dest", help="Destination repository")
     args = parser.parse_args()
     porter = Importer(args.l10n_toml, args.dest)
     return porter.import_strings()
@@ -16,7 +16,7 @@ def main():
 class Importer(object):
     def __init__(self, l10n_toml, dest):
         self.src_toml = l10n_toml
-        self.dest_toml = os.path.join(dest, 'l10n.toml')
+        self.dest_toml = os.path.join(dest, "l10n.toml")
         self.dest = dest
         self.src_config = self.dest_config = None
 
@@ -33,7 +33,7 @@ class Importer(object):
 
     def clean_l10n(self):
         for dest_paths in self.dest_config.paths:
-            matcher = dest_paths['l10n']
+            matcher = dest_paths["l10n"]
             for root, dirs, files in self._walk_matcher(matcher):
                 for file in files:
                     file = os.path.join(root, file)
@@ -41,18 +41,15 @@ class Importer(object):
                         os.remove(file)
                 if not os.listdir(root):
                     os.removedirs(root)
-            
 
     def copy_toml(self):
         shutil.copy2(self.src_toml, self.dest_toml)
         self.dest_config = TOMLParser().parse(self.dest_toml)
 
     def copy_l10n(self):
-        for src_paths, dest_paths in zip(
-            self.src_config.paths, self.dest_config.paths
-        ):
+        for src_paths, dest_paths in zip(self.src_config.paths, self.dest_config.paths):
             self.copy_l10n_for_matcher(
-                src_paths['l10n'], dest_paths['l10n'], dest_paths['reference']
+                src_paths["l10n"], dest_paths["l10n"], dest_paths["reference"]
             )
 
     def copy_l10n_for_matcher(self, src_matcher, dest_matcher, dest_ref):
@@ -75,11 +72,11 @@ class Importer(object):
             basedir = os.path.dirname(basedir)
         for root, dirs, files in os.walk(basedir):
             filtered_dirs = [
-                dir for dir in dirs
-                if os.path.join(root, dir).startswith(prefix)
+                dir for dir in dirs if os.path.join(root, dir).startswith(prefix)
             ]
             dirs[:] = filtered_dirs
             yield root, dirs, files
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

@@ -31,12 +31,13 @@ class Repository(object):
                 os.makedirs(orgdir)
             cmd = [
                 "git",
-                "-C", orgdir,
-                "clone", "-q",
-                os.environ.get(
-                    "X_CHANNEL_UPSTREAM",
-                    "https://github.com"
-                ) + "/" + self.path
+                "-C",
+                orgdir,
+                "clone",
+                "-q",
+                os.environ.get("X_CHANNEL_UPSTREAM", "https://github.com")
+                + "/"
+                + self.path,
             ]
         subprocess.run(cmd)
 
@@ -63,21 +64,21 @@ class SourceRepository(Repository):
 
     @property
     def target_root(self):
-        return self.config.get('target', self.name)
+        return self.config.get("target", self.name)
 
     def branches(self):
         rev = self.lookup_branch(self.branch).target
         tree = self[rev].tree
-        if 'l10n.toml' not in tree:
+        if "l10n.toml" not in tree:
             return [self.branch]
-        toml_data = self[tree['l10n.toml'].id].data
+        toml_data = self[tree["l10n.toml"].id].data
         config = toml.loads(toml_data)
         return config.get("branches", [self.branch])
 
     def lookup_branch(self, branch_name):
         # prefer remote state
         for remote in self.git.remotes:
-            ref = '{}/{}'.format(remote.name, branch_name)
+            ref = "{}/{}".format(remote.name, branch_name)
             branch = self.git.lookup_branch(ref, pygit2.GIT_BRANCH_REMOTE)
             if branch:
                 return branch
@@ -89,7 +90,7 @@ class SourceRepository(Repository):
         self._ref_cache[branch_name] = branch_name
         # but prefer remote state
         for remote in self.git.remotes:
-            ref = '{}/{}'.format(remote.name, branch_name)
+            ref = "{}/{}".format(remote.name, branch_name)
             if self.git.lookup_branch(ref, pygit2.GIT_BRANCH_REMOTE):
                 self._ref_cache[branch_name] = ref
                 break
@@ -106,13 +107,13 @@ class TargetRepository(Repository):
     def converted_revs(self):
         branch = self.git.lookup_branch(self.target_branch).target
         tree = self[branch].tree
-        if '_meta' not in tree:
+        if "_meta" not in tree:
             return {}
-        tree = self[tree['_meta'].id]
+        tree = self[tree["_meta"].id]
         revs = {}
         for treeitem in tree:
             data = json.loads(self[treeitem.id].data)
-            revs[data['name']] = data['revs']
+            revs[data["name"]] = data["revs"]
         return revs
 
     def known_revs(self):

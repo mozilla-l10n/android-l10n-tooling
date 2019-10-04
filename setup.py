@@ -9,14 +9,7 @@ setup(
             "import-android-l10n = mozxchannel.android.importer:main",
         ]
     },
-    packages=find_packages(
-        exclude=["tests"],
-    ),
-    tests_require=[
-        "cram",
-    ],
-    install_requires=[
-        'pygit2~=0.28.2',
-        'compare-locales==7.1.1',
-    ],
+    packages=find_packages(exclude=["tests"]),
+    tests_require=["cram"],
+    install_requires=["pygit2~=0.28.2", "compare-locales==7.1.1"],
 )

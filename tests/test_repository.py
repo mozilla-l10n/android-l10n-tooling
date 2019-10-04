@@ -27,10 +27,7 @@ class TestRepository(TestCase):
                 with open(os.path.join(self.workdir, "file"), "w") as fh:
                     fh.write(cmd + "\n")
             else:
-                subprocess.run(
-                    cmd,
-                    cwd=self.workdir, capture_output=True, env=env
-                )
+                subprocess.run(cmd, cwd=self.workdir, capture_output=True, env=env)
 
     def tearDown(self):
         shutil.rmtree(self.workdir)
@@ -44,10 +41,8 @@ class TestRepository(TestCase):
         repo = repository.Repository(self.workdir)
         repo.ensure_branch("new")
         proc = subprocess.run(
-            ["git", "show-branch", "new"],
-            cwd=self.workdir,
-            capture_output=True
+            ["git", "show-branch", "new"], cwd=self.workdir, capture_output=True
         )
-        self.assertIn(b'[new]', proc.stdout)
-        self.assertIn(b' c2', proc.stdout)
+        self.assertIn(b"[new]", proc.stdout)
+        self.assertIn(b" c2", proc.stdout)
         repo.checkout("new")

@@ -1,6 +1,7 @@
 class GraphWalker(object):
-    '''Base class for iterating over SparseGraph objects.
-    '''
+    """Base class for iterating over SparseGraph objects.
+    """
+
     def __init__(self, graph):
         self.queue = None  # nodes to visit next
         self.visited = None  # nodes we've seen
