@@ -41,3 +41,10 @@ jobs:
             command: >-
                 pip install --user flake8 &&
                 flake8 .
+
+    yamllint:
+        description: "Run yamllint."
+        run:
+            command: >-
+                pip install --user yamllint &&
+                yamllint .
