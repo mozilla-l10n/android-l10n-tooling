@@ -11,3 +11,7 @@ ADD topsrcdir /setup/
 RUN pip3 install /setup
 RUN rm -rf /setup
 
+ADD git-credential-taskcluster /usr/local/bin/
+ADD gitconfig /etc/gitconfig
+RUN chmod a+x /usr/local/bin/git-credential-taskcluster
+RUN pip install taskcluster==19.0.0
