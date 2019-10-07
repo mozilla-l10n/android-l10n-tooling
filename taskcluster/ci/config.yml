@@ -28,6 +28,30 @@ taskgraph:
             default-repository: https://github.com/mozilla-mobile/fenix
             default-ref: master
             type: git
+        fftv:
+            name: "Firefox TV"
+            project-regex: firefox-tv
+            default-repository: https://github.com/mozilla-mobile/firefox-tv
+            default-ref: master
+            type: git
+        ac:
+            name: "Android Components"
+            project-regex: android-components
+            default-repository: https://github.com/mozilla-mobile/android-components
+            default-ref: master
+            type: git
+        lockwise:
+            name: "Lockwise"
+            project-regex: lockwise-android
+            default-repository: https://github.com/mozilla-lockwise/lockwise-android
+            default-ref: master
+            type: git
+        reality:
+            name: "Firefox Reality"
+            project-regex: FirefoxReality
+            default-repository: https://github.com/MozillaReality/FirefoxReality
+            default-ref: master
+            type: git
     cached-task-prefix: l10n.android-l10n-tooling
 
 workers:

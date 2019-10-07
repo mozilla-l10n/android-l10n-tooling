@@ -26,5 +26,13 @@ job-defaults:
         command: ['import-android-l10n', 'android-l10n/{project}/l10n.toml', '{project}']
 
 jobs:
+    MozillaReality/FirefoxReality:
+        repo-prefix: reality
+    mozilla-lockwise/lockwise-android:
+        repo-prefix: lockwise
+    mozilla-mobile/android-components:
+        repo-prefix: ac
     mozilla-mobile/fenix:
         repo-prefix: fenix
+    mozilla-mobile/firefox-tv:
+        repo-prefix: fftv
