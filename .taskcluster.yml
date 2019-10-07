@@ -7,7 +7,7 @@ tasks:
     - $let:
           taskgraph:
               branch: taskgraph
-              revision: 0c5a68749f9a7672a7e56604b69a7bd41b036614
+              revision: f743409a67c7827553b0d896fb72c461e1177495
               repository:
                   name: tools
                   description: Android L10n Tooling
@@ -201,7 +201,7 @@ tasks:
                           # Note: This task is built server side without the context or tooling that
                           # exist in tree so we must hard code the hash
                           image:
-                              mozillareleases/taskgraph:decision-mobile-6020473b1a928d8df50e234a7ca2e81ade2220a4fb5fbe16b02477dd64a49728@sha256:98d226736b7d03907114bf37938002b90e8a37cbe3a297690e349f1ddddb1d7c
+                              mozillareleases/taskgraph:decision-21bef1bc0f11e62c7a23384584f9f8f0d96e95eef192e5bb599fc82ba55c81a7@sha256:53dcd47f72a09c12dd528812b2c4031bbb7db9455959747eb059e5e590f00487
 
                           maxRunTime: 1800
 
@@ -222,7 +222,7 @@ tasks:
                                         ln -s /builds/worker/artifacts artifacts &&
                                         taskgraph action-callback
                                     else: >
-                                        PIP_IGNORE_INSTALLED=0 pip install --user /builds/worker/checkouts/taskgraph &&
+                                        pip install --user /builds/worker/checkouts/taskgraph &&
                                         ln -s /builds/worker/artifacts artifacts &&
                                         ~/.local/bin/taskgraph decision
                                         --pushlog-id='0'
