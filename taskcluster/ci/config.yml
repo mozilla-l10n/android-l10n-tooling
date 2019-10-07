@@ -6,6 +6,8 @@ treeherder:
 
 task-priority: lowest
 
+github-token-secret: l10n/level-3/automation-bot-token
+
 taskgraph:
     repositories:
         tooling:

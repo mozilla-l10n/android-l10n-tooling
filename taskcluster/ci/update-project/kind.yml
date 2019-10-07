@@ -17,8 +17,6 @@ job-defaults:
     worker:
         docker-image: {in-tree: l10n}
         max-run-time: 3600
-        env:
-            GITHUB_TOKEN_SECRET_NAME: l10n/automation-bot/token
     run:
         using: run-task
         cwd: '{checkout}'
