@@ -9,6 +9,7 @@ task-priority: lowest
 github-token-secret: l10n/level-3/automation-bot-token
 
 taskgraph:
+    register: l10n_taskgraph:register
     repositories:
         tooling:
             name: "Android L10n Tooling"
