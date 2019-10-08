@@ -7,10 +7,12 @@ jobs:
     - name: update-l10n
       job:
           type: decision-task
+          treeherder-symbol: upd-l10n
           target-tasks-method: update-l10n
       when: []  # hook only
     - name: update-projects
       job:
           type: decision-task
+          treeherder-symbol: upd-proj
           target-tasks-method: update-projects
       when: []  # hook only
