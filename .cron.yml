@@ -8,11 +8,9 @@ jobs:
       job:
           type: decision-task
           target-tasks-method: update-l10n
-      when: [] # hook only
-          - {hour: 6, minute: 0}
-          - {hour: 18, minute: 0}
+      when: []  # hook only
     - name: update-projects
       job:
           type: decision-task
           target-tasks-method: update-projects
-      when: [] # hook only
+      when: []  # hook only
