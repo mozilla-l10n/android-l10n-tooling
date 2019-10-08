@@ -6,10 +6,52 @@ treeherder:
 
 task-priority: lowest
 
+github-token-secret: l10n/level-3/automation-bot-token
+
 taskgraph:
     repositories:
-        tools:
+        tooling:
             name: "Android L10n Tooling"
+            project-regex: android-l10n-tooling
+            default-repository: https://github.com/mozilla-l10n/android-l10n-tooling
+            default-ref: master
+            type: git
+        l10n:
+            name: "Android L10n"
+            project-regex: android-l10n$
+            default-repository: https://github.com/mozilla-l10n/android-l10n
+            default-ref: master
+            type: git
+        fenix:
+            name: "Fenix"
+            project-regex: fenix
+            default-repository: https://github.com/mozilla-mobile/fenix
+            default-ref: master
+            type: git
+        fftv:
+            name: "Firefox TV"
+            project-regex: firefox-tv
+            default-repository: https://github.com/mozilla-mobile/firefox-tv
+            default-ref: master
+            type: git
+        ac:
+            name: "Android Components"
+            project-regex: android-components
+            default-repository: https://github.com/mozilla-mobile/android-components
+            default-ref: master
+            type: git
+        lockwise:
+            name: "Lockwise"
+            project-regex: lockwise-android
+            default-repository: https://github.com/mozilla-lockwise/lockwise-android
+            default-ref: master
+            type: git
+        reality:
+            name: "Firefox Reality"
+            project-regex: FirefoxReality
+            default-repository: https://github.com/MozillaReality/FirefoxReality
+            default-ref: master
+            type: git
     cached-task-prefix: l10n.android-l10n-tooling
 
 workers:

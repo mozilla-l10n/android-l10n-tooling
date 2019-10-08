@@ -13,6 +13,7 @@ from mozxchannel.git.repository import (
     SourceRepository,
     TargetRepository,
 )
+from mozxchannel.git import pull_request
 
 
 def handle(target, target_branch, repos_to_iterate, pull=False):
@@ -309,6 +310,7 @@ class CommitWalker(walker.GraphWalker):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--pull", action="store_true")
+    p.add_argument("--pull-request", action="store_true")
     p.add_argument("--repo", nargs="*")
     p.add_argument("target")
     p.add_argument("--branch", default="master")
@@ -316,6 +318,9 @@ def main():
     graph = handle(args.target, args.branch, args.repo, pull=args.pull)
     echo = CommitWalker(graph, args.branch)
     echo.walkGraph()
+    if args.pull_request:
+        title = "Import {} quarantine.".format(", ".join(args.repo))
+        pull_request.create(args.target, branch=args.branch, title=title, message="n/t")
 
 
 if __name__ == "__main__":

@@ -17,8 +17,11 @@ job-defaults:
         max-run-time: 3600
     run:
         using: run-task
+        checkout:
+            tooling:
+                path: ''
         cwd: '{checkout}'
-        cache-dotcache: true
+        use-caches: false
 
 jobs:
     unit:

@@ -1,0 +1,9 @@
+[credential]
+helper = taskcluster
+
+[git-pull-request]
+no-rebase = true
+
+[user]
+name = "Mozilla L10n Automation Bot"
+email = "release+l10n-automation-bot@mozilla.com"

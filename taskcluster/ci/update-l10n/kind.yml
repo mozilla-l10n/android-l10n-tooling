@@ -1,0 +1,38 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+---
+
+loader: taskgraph.loader.transform:loader
+
+transforms:
+    - l10n_taskgraph.update:transforms
+    - taskgraph.transforms.job:transforms
+    - taskgraph.transforms.task:transforms
+
+job-defaults:
+    attributes: {}
+    description: "Update android-l10n with changes from {project}"
+    worker-type: linux
+    worker:
+        docker-image: {in-tree: l10n}
+        max-run-time: 3600
+    run:
+        using: run-task
+        cwd: '{checkout}'
+        checkout:
+            l10n:
+                path: android-l10n
+        command: ['create-l10n-branch', '--repo', '{project}', '--branch', '{repo_name}-quarantine', 'android-l10n']
+
+jobs:
+    MozillaReality/FirefoxReality:
+        repo-prefix: reality
+    mozilla-lockwise/lockwise-android:
+        repo-prefix: lockwise
+    mozilla-mobile/android-components:
+        repo-prefix: ac
+    mozilla-mobile/fenix:
+        repo-prefix: fenix
+    mozilla-mobile/firefox-tv:
+        repo-prefix: fftv

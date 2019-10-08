@@ -1,16 +1,33 @@
 import argparse
 import os
 import shutil
+import subprocess
 from compare_locales.paths import TOMLParser
+
+from mozxchannel.git import pull_request
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('l10n_toml', help='l10n.toml with localizations')
     parser.add_argument('dest', help='Destination repository')
+    parser.add_argument("--pull-request", action="store_true")
     args = parser.parse_args()
+
     porter = Importer(args.l10n_toml, args.dest)
-    return porter.import_strings()
+    porter.import_strings()
+
+    if args.pull_request:
+        subprocess.run(
+            ["git", "-C", args.dest, "checkout", "-B", "import-l10n"], check=True
+        )
+        subprocess.run(
+            cmd=["git", "-C", args.dest, "commit", "-a", "-m", "Import l10n."],
+            check=True,
+        )
+        pull_request.create(
+            args.dest, title="Import strings from android-l10n.", message="n/t"
+        )
 
 
 class Importer(object):
