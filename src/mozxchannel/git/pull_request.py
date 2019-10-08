@@ -15,5 +15,5 @@ def create(target, *, title, message, branch=None):
     # git pull-request will sometimes open an editor, ensure this succeeds
     env = os.environ.copy()
     env["EDITOR"] = "true"
-    cmd = ["git", "-C", target, "pull-request", "-t", title, "-m", message]
+    cmd = ["git", "-C", target, "pull-request", "--title", title, "--message", message]
     subprocess.run(cmd, env=env, check=True)
