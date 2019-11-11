@@ -7,7 +7,7 @@ tasks:
     - $let:
           taskgraph:
               branch: taskgraph
-              revision: f743409a67c7827553b0d896fb72c461e1177495
+              revision: bbd657c72f8a5fb113f14ca0a8bd02d9cbd06189
               repository:
                   name: tools
                   description: Android L10n Tooling
@@ -117,9 +117,9 @@ tasks:
                                         description: '${action.description}'
                                     else:
                                         name: "Decision Task for cron job ${cron.job_name}"
-                                        description: 'Created by a [cron task](https://tools.taskcluster.net/tasks/${cron.task_id})'
-                      provisionerId: "aws-provisioner-v1"
-                      workerType: "${trustDomain}-${level}-linux"
+                                        description: 'Created by a [cron task](https://firefox-ci-tc.services.mozilla.com/tasks/${cron.task_id})'
+                      provisionerId: "${trustDomain}-${level}"
+                      workerType: "decision"
                       tags:
                           $if: 'tasks_for in ["github-push", "github-pull-request"]'
                           then:

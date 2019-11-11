@@ -58,12 +58,12 @@ taskgraph:
 workers:
     aliases:
         linux:
-            provisioner: aws-provisioner-v1
+            provisioner: 'l10n-{level}'
             implementation: docker-worker
             os: linux
-            worker-type: 'l10n-{level}-linux'
+            worker-type: 'linux'
         images:
-            provisioner: aws-provisioner-v1
+            provisioner: 'l10n-{level}'
             implementation: docker-worker
             os: linux
-            worker-type: 'l10n-{level}-images'
+            worker-type: 'images'
