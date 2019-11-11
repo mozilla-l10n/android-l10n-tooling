@@ -7,7 +7,7 @@ tasks:
     - $let:
           taskgraph:
               branch: taskgraph
-              revision: f743409a67c7827553b0d896fb72c461e1177495
+              revision: bbd657c72f8a5fb113f14ca0a8bd02d9cbd06189
               repository:
                   name: tools
                   description: Android L10n Tooling
