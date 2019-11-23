@@ -15,4 +15,5 @@ jobs:
           type: decision-task
           treeherder-symbol: upd-proj
           target-tasks-method: update-projects
-      when: []  # hook only
+      when:
+          - {hour: 0, minute: 0}
