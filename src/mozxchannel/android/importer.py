@@ -22,7 +22,10 @@ def main():
             ["git", "-C", args.dest, "checkout", "-B", "import-l10n"], check=True
         )
         subprocess.run(
-            ["git", "-C", args.dest, "commit", "-a", "-m", "Import l10n."], check=True
+            ["git", "-C", args.dest, "add", "-v", "."], check=True
+        )
+        subprocess.run(
+            ["git", "-C", args.dest, "commit", "-m", "Import l10n."], check=True
         )
         pull_request.create(
             args.dest, title="Import strings from android-l10n.", message="n/t"
