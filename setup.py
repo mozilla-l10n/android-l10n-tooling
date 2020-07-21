@@ -17,6 +17,6 @@ setup(
     ],
     install_requires=[
         'pygit2~=0.28.2',
-        'compare-locales==7.1.1',
+        'compare-locales==8.0.0',
     ],
 )
