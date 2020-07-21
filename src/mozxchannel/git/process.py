@@ -1,5 +1,6 @@
 import argparse
 from collections import defaultdict
+from glob import glob
 import json
 import os
 import subprocess
@@ -112,13 +113,24 @@ class CommitsGraph:
     def gather_repo(self, repo):
         basepath = repo.path
         pc = TOMLParser().parse(mozpath.join(basepath, "l10n.toml"))
-        paths = ["l10n.toml"] + [
-            mozpath.relpath(
-                m["reference"].pattern.expand(m["reference"].env),
-                basepath
-            )
-            for m in pc.paths
-        ]
+        paths = ["l10n.toml"]
+        # Add the reference files to the paths for this repository.
+        # If it a simple path, just add.
+        # If it's a wildcard path, the prefix will be a directory.
+        # glob all files and select those that match.
+        for path_matcher in pc.paths:
+            root = path_matcher["reference"].prefix
+            if os.path.isdir(root):
+                paths += [
+                    mozpath.relpath(f, basepath)
+                    for f in glob(root + "/**", recursive=True)
+                    if path_matcher["reference"].match(f)
+                ]
+            else:
+                paths.append(mozpath.relpath(
+                    root,
+                    basepath
+                ))
         self.paths_for_repos[repo.name] = paths
         branches = repo.branches()
         self.branches[repo.name] = branches[:]
