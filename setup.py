@@ -16,7 +16,7 @@ setup(
         "cram",
     ],
     install_requires=[
-        'pygit2~=0.28.2',
+        'pygit2~=1.2.1',
         'compare-locales==8.0.0',
     ],
 )
