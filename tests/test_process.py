@@ -6,13 +6,8 @@ from compare_locales.paths import TOMLParser
 
 class TestCommitsGraph(TestCase):
     @mock.patch('mozxchannel.git.process.glob')
-    @mock.patch(
-        "mozxchannel.git.process.CommitsGraph.__init__",
-        return_value=None,
-    )
     @mock.patch('os.path.isdir')
-    def test_references_file(self, is_dir, target_repo_mock, glob_mock):
-        g = process.CommitsGraph()
+    def test_references_file(self, is_dir, glob_mock):
         parser = TOMLParser()
 
         def mock_load(ctx):
@@ -31,18 +26,13 @@ class TestCommitsGraph(TestCase):
         is_dir.side_effect = lambda p: not p.endswith("fixed/file.ftl")
         glob_mock.side_effect = Exception("not called")
         self.assertListEqual(
-            g.references(pc, "a/basedir"),
+            process.references(pc, "a/basedir"),
             ["l10n.toml", "some/fixed/file.ftl"]
         )
 
     @mock.patch('mozxchannel.git.process.glob')
-    @mock.patch(
-        "mozxchannel.git.process.CommitsGraph.__init__",
-        return_value=None,
-    )
     @mock.patch('os.path.isdir')
-    def test_references_wildcard(self, is_dir, target_repo_mock, glob_mock):
-        g = process.CommitsGraph()
+    def test_references_wildcard(self, is_dir, glob_mock):
         parser = TOMLParser()
 
         def mock_load(ctx):
@@ -68,6 +58,6 @@ class TestCommitsGraph(TestCase):
             ]
         ]
         self.assertListEqual(
-            g.references(pc, "a/basedir"),
+            process.references(pc, "a/basedir"),
             ["l10n.toml", "some/other/file.ftl", "some/second/deep/file.ftl"]
         )

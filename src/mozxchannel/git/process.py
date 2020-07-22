@@ -113,7 +113,7 @@ class CommitsGraph:
     def gather_repo(self, repo):
         basepath = repo.path
         pc = TOMLParser().parse(mozpath.join(basepath, "l10n.toml"))
-        self.paths_for_repos[repo.name] = paths = self.references(pc, basepath)
+        self.paths_for_repos[repo.name] = paths = references(pc, basepath)
         branches = repo.branches()
         self.branches[repo.name] = branches[:]
         known_revs = self.revs.get(repo.name, {})
@@ -192,26 +192,27 @@ class CommitsGraph:
                         (repo.name, branch, branch_rev)
                     )
 
-    def references(self, pc, basepath):
-        paths = ["l10n.toml"]
-        # Add the reference files to the paths for this repository.
-        # If it a simple path, just add.
-        # If it's a wildcard path, the prefix will be a directory.
-        # glob all files and select those that match.
-        for path_matcher in pc.paths:
-            root = path_matcher["reference"].prefix
-            if os.path.isdir(root):
-                paths += [
-                    mozpath.relpath(f, basepath)
-                    for f in glob(root + "/**", recursive=True)
-                    if path_matcher["reference"].match(f)
-                ]
-            else:
-                paths.append(mozpath.relpath(
-                    root,
-                    basepath
-                ))
-        return paths
+
+def references(pc, basepath):
+    paths = ["l10n.toml"]
+    # Add the reference files to the paths for this repository.
+    # If it a simple path, just add.
+    # If it's a wildcard path, the prefix will be a directory.
+    # glob all files and select those that match.
+    for path_matcher in pc.paths:
+        root = path_matcher["reference"].prefix
+        if os.path.isdir(root):
+            paths += [
+                mozpath.relpath(f, basepath)
+                for f in glob(root + "/**", recursive=True)
+                if path_matcher["reference"].match(f)
+            ]
+        else:
+            paths.append(mozpath.relpath(
+                root,
+                basepath
+            ))
+    return paths
 
 
 class CommitWalker(walker.GraphWalker):
