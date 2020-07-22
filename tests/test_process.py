@@ -7,12 +7,12 @@ from compare_locales.paths import TOMLParser
 class TestCommitsGraph(TestCase):
     @mock.patch('mozxchannel.git.process.glob')
     @mock.patch(
-        "mozxchannel.git.repository.TargetRepository.__init__",
+        "mozxchannel.git.process.CommitsGraph.__init__",
         return_value=None,
     )
     @mock.patch('os.path.isdir')
     def test_references_file(self, is_dir, target_repo_mock, glob_mock):
-        g = process.CommitsGraph("target_dir", "master", None)
+        g = process.CommitsGraph()
         parser = TOMLParser()
 
         def mock_load(ctx):
@@ -37,12 +37,12 @@ class TestCommitsGraph(TestCase):
 
     @mock.patch('mozxchannel.git.process.glob')
     @mock.patch(
-        "mozxchannel.git.repository.TargetRepository.__init__",
+        "mozxchannel.git.process.CommitsGraph.__init__",
         return_value=None,
     )
     @mock.patch('os.path.isdir')
     def test_references_wildcard(self, is_dir, target_repo_mock, glob_mock):
-        g = process.CommitsGraph("target_dir", "master", None)
+        g = process.CommitsGraph()
         parser = TOMLParser()
 
         def mock_load(ctx):
