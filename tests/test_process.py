@@ -1,47 +1,18 @@
 from unittest import TestCase
 from unittest import mock
-import os
-import shutil
-import subprocess
-import tempfile
 from mozxchannel.git import process
 from compare_locales.paths import TOMLParser
 
 
 class TestCommitsGraph(TestCase):
-    def setUp(self):
-        self.workdir = tempfile.mkdtemp()
-        env = {
-            "GIT_AUTHOR_NAME": "Jane Doe",
-            "GIT_AUTHOR_EMAIL": "Jane@example.tld",
-            "GIT_COMMITTER_NAME": "Jane Doe",
-            "GIT_COMMITTER_EMAIL": "Jane@example.tld",
-        }
-        for cmd in [
-            ["git", "init"],
-            "some content",
-            ["git", "add", "file"],
-            ["git", "commit", "-m", "c1"],
-            "more content",
-            ["git", "commit", "-am", "c2"],
-        ]:
-            if isinstance(cmd, str):
-                with open(os.path.join(self.workdir, "file"), "w") as fh:
-                    fh.write(cmd + "\n")
-            else:
-                subprocess.run(
-                    cmd,
-                    cwd=self.workdir, capture_output=True, env=env
-                )
-
-    def tearDown(self):
-        shutil.rmtree(self.workdir)
-        self.workdir = None
-
     @mock.patch('mozxchannel.git.process.glob')
+    @mock.patch(
+        "mozxchannel.git.repository.TargetRepository.__init__",
+        return_value=None,
+    )
     @mock.patch('os.path.isdir')
-    def test_references_file(self, is_dir, glob_mock):
-        g = process.CommitsGraph(self.workdir, "master", None)
+    def test_references_file(self, is_dir, target_repo_mock, glob_mock):
+        g = process.CommitsGraph("target_dir", "master", None)
         parser = TOMLParser()
 
         def mock_load(ctx):
@@ -65,9 +36,13 @@ class TestCommitsGraph(TestCase):
         )
 
     @mock.patch('mozxchannel.git.process.glob')
+    @mock.patch(
+        "mozxchannel.git.repository.TargetRepository.__init__",
+        return_value=None,
+    )
     @mock.patch('os.path.isdir')
-    def test_references_wildcard(self, is_dir, glob_mock):
-        g = process.CommitsGraph(self.workdir, "master", None)
+    def test_references_wildcard(self, is_dir, target_repo_mock, glob_mock):
+        g = process.CommitsGraph("target_dir", "master", None)
         parser = TOMLParser()
 
         def mock_load(ctx):
