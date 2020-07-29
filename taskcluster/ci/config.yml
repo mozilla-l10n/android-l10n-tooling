@@ -51,7 +51,7 @@ taskgraph:
             name: "Firefox Reality"
             project-regex: FirefoxReality
             default-repository: https://github.com/MozillaReality/FirefoxReality
-            default-ref: master
+            default-ref: main
             type: git
     cached-task-prefix: l10n.android-l10n-tooling
 
