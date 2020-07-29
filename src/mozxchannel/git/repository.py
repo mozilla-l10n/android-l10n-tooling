@@ -65,8 +65,9 @@ class SourceRepository(Repository):
     def target_root(self):
         return self.config.get('target', self.name)
 
-    def branches(self):
-        rev = self.lookup_branch(self.branch).target
+    def branches(self, rev=None):
+        if rev is None:
+            rev = self.lookup_branch(self.branch).target
         tree = self[rev].tree
         if 'l10n.toml' not in tree:
             return [self.branch]

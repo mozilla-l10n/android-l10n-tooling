@@ -173,24 +173,31 @@ class CommitsGraph:
                 ).stdout.strip()
                 if not branch_rev:
                     continue
-                # We have a branch revision, find the next child on the
-                # route to the prior branch to add that to.
+                # We have a branch revision, find the revision that
+                # added it to the source config, in the list of
+                # existing commits we found above.
                 cmd = [
                     "git",
                     "-C",
                     basepath,
                     "rev-list",
-                    "-n",
-                    "1",
-                    "{}..{}".format(branch_rev, repo.ref(prior_branch)),
-                ]
-                fork_rev = subprocess.run(
+                    "--reverse",
+                    "{}^..{}".format(branch_rev, repo.ref(prior_branch)),
+                    "--"
+                ] + paths
+                fork_revs = subprocess.run(
                     cmd, stdout=subprocess.PIPE, encoding="ascii"
                 ).stdout.strip()
-                if fork_rev:
-                    self.forks[fork_rev].append(
-                        (repo.name, branch, branch_rev)
-                    )
+                for fork_rev in fork_revs.splitlines():
+                    if fork_rev in self.hashes_for_repo[repo.name]:
+                        current_branches = repo.branches(fork_rev)
+                        if branch not in current_branches:
+                            # we don't have the forked branch set up yet
+                            continue
+                        self.forks[fork_rev].append(
+                            (repo.name, branch, branch_rev)
+                        )
+                        break
 
 
 def references(pc, basepath):
