@@ -11,7 +11,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('l10n_toml', help='l10n.toml with localizations')
     parser.add_argument('dest', help='Destination repository')
-    parser.add_argument("--pull-request", action="store_true")
+    parser.add_argument("--pull-request", default=None)
     args = parser.parse_args()
 
     porter = Importer(args.l10n_toml, args.dest)
@@ -28,7 +28,7 @@ def main():
     )
     if args.pull_request:
         pull_request.create(
-            args.dest, title="Import strings from android-l10n.", message="n/t"
+            args.dest, args.pull_request, title="Import strings from android-l10n.", message="n/t"
         )
 
 

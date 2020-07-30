@@ -333,7 +333,7 @@ class CommitWalker(walker.GraphWalker):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--pull", action="store_true")
-    p.add_argument("--pull-request", action="store_true")
+    p.add_argument("--pull-request", default=None)
     p.add_argument("--repo", nargs="*")
     p.add_argument("target")
     p.add_argument("--branch", default="master")
@@ -343,7 +343,7 @@ def main():
     echo.walkGraph()
     if args.pull_request:
         title = "Import {} quarantine.".format(", ".join(args.repo))
-        pull_request.create(args.target, branch=args.branch, title=title, message="n/t")
+        pull_request.create(args.target, args.pull_request, branch=args.branch, title=title, message="n/t")
 
 
 if __name__ == "__main__":

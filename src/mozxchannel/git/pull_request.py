@@ -6,7 +6,7 @@ import os
 import subprocess
 
 
-def create(target, *, title, message, branch=None):
+def create(target, target_branch, *, title, message, branch=None):
     # git pull-request creates a PR from the current branch, so switch to it.
     if branch:
         cmd = ["git", "-C", target, "checkout", branch]
@@ -15,5 +15,5 @@ def create(target, *, title, message, branch=None):
     # git pull-request will sometimes open an editor, ensure this succeeds
     env = os.environ.copy()
     env["EDITOR"] = "true"
-    cmd = ["git", "-C", target, "pull-request", "--title", title, "--message", message]
+    cmd = ["git", "-C", target, "pull-request", "--target-branch", target_branch, "--title", title, "--message", message]
     subprocess.run(cmd, env=env, check=True)
