@@ -19,7 +19,7 @@ def update_l10n(config, jobs):
 
         project = job["name"]
         repo_prefix = job.pop("repo-prefix")
-        pr_target = job.pop("pr-target", "master")
+        pr_target = job.pop("pr-target")
         repo_name = project.split("/", 1)[1]
 
         job["description"] = job["description"].format(project=project)
