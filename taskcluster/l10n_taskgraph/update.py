@@ -19,6 +19,7 @@ def update_l10n(config, jobs):
 
         project = job["name"]
         repo_prefix = job.pop("repo-prefix")
+        pr_target = job.pop("pr-target")
         repo_name = project.split("/", 1)[1]
 
         job["description"] = job["description"].format(project=project)
@@ -27,7 +28,7 @@ def update_l10n(config, jobs):
             arg.format(project=project, repo_name=repo_name) for arg in run["command"]
         ]
         if config.params["level"] == "3":
-            run["command"][1:1] = ["--pull-request"]
+            run["command"][1:1] = ["--pull-request={}".format(pr_target)]
             job.setdefault("scopes", []).append("secrets:get:{}".format(secret_name))
             worker["taskcluster-proxy"] = True
             worker.setdefault("env", {})["GITHUB_TOKEN_SECRET_NAME"] = secret_name

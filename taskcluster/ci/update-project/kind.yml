@@ -17,6 +17,7 @@ job-defaults:
     worker:
         docker-image: {in-tree: l10n}
         max-run-time: 3600
+    pr-target: main
     run:
         using: run-task
         cwd: '{checkout}'
@@ -30,9 +31,13 @@ jobs:
         repo-prefix: reality
     mozilla-lockwise/lockwise-android:
         repo-prefix: lockwise
+        pr-target: master
     mozilla-mobile/android-components:
         repo-prefix: ac
+        pr-target: master
     mozilla-mobile/fenix:
         repo-prefix: fenix
+        pr-target: master
     mozilla-mobile/firefox-tv:
         repo-prefix: fftv
+        pr-target: master

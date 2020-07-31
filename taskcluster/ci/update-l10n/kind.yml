@@ -17,6 +17,7 @@ job-defaults:
     worker:
         docker-image: {in-tree: l10n}
         max-run-time: 3600
+    pr-target: master
     run:
         using: run-task
         cwd: '{checkout}'
