@@ -35,5 +35,3 @@ jobs:
         repo-prefix: ac
     mozilla-mobile/fenix:
         repo-prefix: fenix
-    mozilla-mobile/firefox-tv:
-        repo-prefix: fftv
