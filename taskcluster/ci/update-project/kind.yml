@@ -38,6 +38,3 @@ jobs:
     mozilla-mobile/fenix:
         repo-prefix: fenix
         pr-target: master
-    mozilla-mobile/firefox-tv:
-        repo-prefix: fftv
-        pr-target: master

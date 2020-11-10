@@ -29,12 +29,6 @@ taskgraph:
             default-repository: https://github.com/mozilla-mobile/fenix
             default-ref: master
             type: git
-        fftv:
-            name: "Firefox TV"
-            project-regex: firefox-tv
-            default-repository: https://github.com/mozilla-mobile/firefox-tv
-            default-ref: master
-            type: git
         ac:
             name: "Android Components"
             project-regex: android-components
