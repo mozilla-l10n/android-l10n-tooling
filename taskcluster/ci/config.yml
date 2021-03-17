@@ -41,12 +41,6 @@ taskgraph:
             default-repository: https://github.com/mozilla-lockwise/lockwise-android
             default-ref: master
             type: git
-        reality:
-            name: "Firefox Reality"
-            project-regex: FirefoxReality
-            default-repository: https://github.com/MozillaReality/FirefoxReality
-            default-ref: main
-            type: git
     cached-task-prefix: l10n.android-l10n-tooling
 
 workers:

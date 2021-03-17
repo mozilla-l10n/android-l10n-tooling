@@ -27,8 +27,6 @@ job-defaults:
         command: ['create-l10n-branch', '--repo', '{project}', '--branch', '{repo_name}-quarantine', 'android-l10n']
 
 jobs:
-    MozillaReality/FirefoxReality:
-        repo-prefix: reality
     mozilla-lockwise/lockwise-android:
         repo-prefix: lockwise
     mozilla-mobile/android-components:
