@@ -33,3 +33,6 @@ jobs:
         repo-prefix: ac
     mozilla-mobile/fenix:
         repo-prefix: fenix
+    mozilla-mobile/focus-android:
+        repo-prefix: focusandroid
+
