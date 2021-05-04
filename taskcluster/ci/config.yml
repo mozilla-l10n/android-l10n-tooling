@@ -41,6 +41,12 @@ taskgraph:
             default-repository: https://github.com/mozilla-lockwise/lockwise-android
             default-ref: master
             type: git
+        focusandroid:
+            name: "Focus Android"
+            project-regex: focus-android
+            default-repository: https://github.com/mozilla-mobile/focus-android
+            default-ref: main
+            type: git
     cached-task-prefix: l10n.android-l10n-tooling
 
 workers:
