@@ -33,7 +33,7 @@ taskgraph:
             name: "Android Components"
             project-regex: android-components
             default-repository: https://github.com/mozilla-mobile/android-components
-            default-ref: master
+            default-ref: main
             type: git
         lockwise:
             name: "Lockwise"
