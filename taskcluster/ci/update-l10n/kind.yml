@@ -31,6 +31,7 @@ jobs:
         repo-prefix: lockwise
     mozilla-mobile/android-components:
         repo-prefix: ac
+        pr-target: main
     mozilla-mobile/fenix:
         repo-prefix: fenix
     mozilla-mobile/focus-android:
