@@ -35,7 +35,7 @@ jobs:
         pr-target: main
     mozilla-mobile/fenix:
         repo-prefix: fenix
-        pr-target: master
+        pr-target: main
     mozilla-mobile/focus-android:
         repo-prefix: focusandroid
         pr-target: main

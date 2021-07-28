@@ -27,7 +27,7 @@ taskgraph:
             name: "Fenix"
             project-regex: fenix
             default-repository: https://github.com/mozilla-mobile/fenix
-            default-ref: master
+            default-ref: main
             type: git
         ac:
             name: "Android Components"
