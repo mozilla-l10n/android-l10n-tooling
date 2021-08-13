@@ -2,7 +2,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from __future__ import absolute_import, print_function, unicode_literals
 
 from taskgraph.transforms.base import TransformSequence
 
@@ -28,8 +27,8 @@ def update_l10n(config, jobs):
             arg.format(project=project, repo_name=repo_name) for arg in run["command"]
         ]
         if config.params["level"] == "3":
-            run["command"][1:1] = ["--pull-request={}".format(pr_target)]
-            job.setdefault("scopes", []).append("secrets:get:{}".format(secret_name))
+            run["command"][1:1] = [f"--pull-request={pr_target}"]
+            job.setdefault("scopes", []).append(f"secrets:get:{secret_name}")
             worker["taskcluster-proxy"] = True
             worker.setdefault("env", {})["GITHUB_TOKEN_SECRET_NAME"] = secret_name
 
