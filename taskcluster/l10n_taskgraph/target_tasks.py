@@ -12,7 +12,7 @@ def target_tasks_l10n(full_task_graph, parameters, graph_config):
     def filter(task, parameters):
         return task.kind == "update-l10n"
 
-    return [l for l, t in full_task_graph.tasks.iteritems() if filter(t, parameters)]
+    return [l for l, t in full_task_graph.tasks.items() if filter(t, parameters)]
 
 
 @_target_task("update-projects")
@@ -22,4 +22,4 @@ def target_tasks_project(full_task_graph, parameters, graph_config):
     def filter(task, parameters):
         return task.kind == "update-project"
 
-    return [l for l, t in full_task_graph.tasks.iteritems() if filter(t, parameters)]
+    return [l for l, t in full_task_graph.tasks.items() if filter(t, parameters)]

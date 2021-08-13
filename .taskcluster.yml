@@ -222,7 +222,7 @@ tasks:
                                         ln -s /builds/worker/artifacts artifacts &&
                                         taskgraph action-callback
                                     else: >
-                                        pip install --user /builds/worker/checkouts/taskgraph &&
+                                        pip3 install --user /builds/worker/checkouts/taskgraph &&
                                         ln -s /builds/worker/artifacts artifacts &&
                                         ~/.local/bin/taskgraph decision
                                         --pushlog-id='0'
