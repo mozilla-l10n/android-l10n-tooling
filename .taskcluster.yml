@@ -7,7 +7,7 @@ tasks:
     - $let:
           taskgraph:
               branch: taskgraph
-              revision: bbd657c72f8a5fb113f14ca0a8bd02d9cbd06189
+              revision: 1c0f7a872b6876aa048abc0f23103005b80a5da6
               repository:
                   name: tools
                   description: Android L10n Tooling
@@ -201,7 +201,7 @@ tasks:
                           # Note: This task is built server side without the context or tooling that
                           # exist in tree so we must hard code the hash
                           image:
-                              mozillareleases/taskgraph:decision-d9fab4448ee5e00b0a29825c3f0609af957279daf102547d715414782710ef06@sha256:79eb469838621168a6364476b96850fc9f2d353686195c010ad078fdcf29568e
+                              mozillareleases/taskgraph:decision-e035c4bb24e3a05bcd666518756aa69fac302ed1e73fd39d39cd182fc4470818@sha256:7cfb913bee636f1ab1477a09f8ad746e1f8c68fab0e2a3e1408c985d2ddc27f7
 
                           maxRunTime: 1800
 
@@ -222,7 +222,7 @@ tasks:
                                         ln -s /builds/worker/artifacts artifacts &&
                                         taskgraph action-callback
                                     else: >
-                                        pip install --user /builds/worker/checkouts/taskgraph &&
+                                        pip3 install --user /builds/worker/checkouts/taskgraph &&
                                         ln -s /builds/worker/artifacts artifacts &&
                                         ~/.local/bin/taskgraph decision
                                         --pushlog-id='0'
@@ -244,6 +244,14 @@ tasks:
                                   type: 'directory'
                                   path: '/builds/worker/artifacts'
                                   expires: {$fromNow: '1 year'}
+                              'public/docker-contexts':
+                                  type: 'directory'
+                                  path: '/builds/worker/checkouts/src/docker-contexts'
+                                  # This needs to be at least the deadline of the
+                                  # decision task + the docker-image task deadlines.
+                                  # It is set to a week to allow for some time for
+                                  # debugging, but they are not useful long-term.
+                                  expires: {$fromNow: '7 day'}
 
                       extra:
                           $merge:
