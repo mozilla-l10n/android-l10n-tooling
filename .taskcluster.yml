@@ -5,13 +5,10 @@ policy:
     pullRequests: public
 tasks:
     - $let:
-          taskgraph:
-              branch: taskgraph
-              revision: 1c0f7a872b6876aa048abc0f23103005b80a5da6
-              repository:
-                  name: tools
-                  description: Android L10n Tooling
-              treeherder: false
+          repository:
+              name: tools
+              description: Android L10n Tooling
+          treeherder: false
           trustDomain: l10n
           canonicalRepo: https://github.com/mozilla-l10n/android-l10n-tooling
       in:
@@ -80,7 +77,7 @@ tasks:
                       else:
                           $if: 'tasks_for == "cron"'
                           then: '${ownTaskId}'
-                  repositoryPrefix: '${uppercase(taskgraph.repository.name)}'
+                  repositoryPrefix: '${uppercase(repository.name)}'
               in:
                   $let:
                       level:
@@ -135,7 +132,7 @@ tasks:
                       routes:
                           $flatten:
                               - checks
-                              - $if: 'tasks_for != "github-pull-request" && taskgraph.treeherder'
+                              - $if: 'tasks_for != "github-pull-request" && treeherder'
                                 then:
                                     - "tc-treeherder.v2.${project}.${head_sha}"
                                 else: []
@@ -178,13 +175,9 @@ tasks:
                                     '${repositoryPrefix}_HEAD_REPOSITORY': '${repoUrl}'
                                     '${repositoryPrefix}_HEAD_REF': '${head_branch}'
                                     '${repositoryPrefix}_HEAD_REV': '${head_sha}'
+                                    '${repositoryPrefix}_PIP_REQUIREMENTS': taskcluster/requirements.txt
                                     '${repositoryPrefix}_REPOSITORY_TYPE': git
-                                    TASKGRAPH_BASE_REPOSITORY: https://hg.mozilla.org/ci/taskgraph
-                                    TASKGRAPH_HEAD_REPOSITORY: https://hg.mozilla.org/ci/${taskgraph.branch}
-                                    TASKGRAPH_HEAD_REV: ${taskgraph.revision}
-                                    TASKGRAPH_REPOSITORY_TYPE: hg
-                                    REPOSITORIES: {$json: {'${taskgraph.repository.name}': '${taskgraph.repository.description}', taskgraph: "Taskgraph"}}
-                                    HG_STORE_PATH: /builds/worker/checkouts/hg-store
+                                    REPOSITORIES: {$json: {'${repository.name}': '${repository.description}'}}
                                     ANDROID_SDK_ROOT: /builds/worker/android-sdk
                                   - $if: 'tasks_for in ["github-pull-request"]'
                                     then:
@@ -201,14 +194,13 @@ tasks:
                           # Note: This task is built server side without the context or tooling that
                           # exist in tree so we must hard code the hash
                           image:
-                              mozillareleases/taskgraph:decision-e035c4bb24e3a05bcd666518756aa69fac302ed1e73fd39d39cd182fc4470818@sha256:7cfb913bee636f1ab1477a09f8ad746e1f8c68fab0e2a3e1408c985d2ddc27f7
+                              mozillareleases/taskgraph:decision-cf4b4b4baff57d84c1f9ec8fcd70c9839b70a7d66e6430a6c41ffe67252faa19@sha256:425e07f6813804483bc5a7258288a7684d182617ceeaa0176901ccc7702dfe28
 
                           maxRunTime: 1800
 
                           command:
                               - /usr/local/bin/run-task
-                              - '--${taskgraph.repository.name}-checkout=/builds/worker/checkouts/src'
-                              - '--taskgraph-checkout=/builds/worker/checkouts/taskgraph'
+                              - '--${repository.name}-checkout=/builds/worker/checkouts/src'
                               - '--task-cwd=/builds/worker/checkouts/src'
                               - '--'
                               - bash
@@ -222,7 +214,6 @@ tasks:
                                         ln -s /builds/worker/artifacts artifacts &&
                                         taskgraph action-callback
                                     else: >
-                                        pip3 install --user /builds/worker/checkouts/taskgraph &&
                                         ln -s /builds/worker/artifacts artifacts &&
                                         ~/.local/bin/taskgraph decision
                                         --pushlog-id='0'
