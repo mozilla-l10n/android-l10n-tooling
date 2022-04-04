@@ -5,7 +5,7 @@ policy:
     pullRequests: public
 tasks:
     - $let:
-          repository:
+          meta:
               name: tools
               description: Android L10n Tooling
           treeherder: false
@@ -77,7 +77,7 @@ tasks:
                       else:
                           $if: 'tasks_for == "cron"'
                           then: '${ownTaskId}'
-                  repositoryPrefix: '${uppercase(repository.name)}'
+                  repositoryPrefix: '${uppercase(meta.name)}'
               in:
                   $let:
                       level:
@@ -177,7 +177,7 @@ tasks:
                                     '${repositoryPrefix}_HEAD_REV': '${head_sha}'
                                     '${repositoryPrefix}_PIP_REQUIREMENTS': taskcluster/requirements.txt
                                     '${repositoryPrefix}_REPOSITORY_TYPE': git
-                                    REPOSITORIES: {$json: {'${repository.name}': '${repository.description}'}}
+                                    REPOSITORIES: {$json: {'${meta.name}': '${meta.description}'}}
                                     ANDROID_SDK_ROOT: /builds/worker/android-sdk
                                   - $if: 'tasks_for in ["github-pull-request"]'
                                     then:
@@ -200,7 +200,7 @@ tasks:
 
                           command:
                               - /usr/local/bin/run-task
-                              - '--${repository.name}-checkout=/builds/worker/checkouts/src'
+                              - '--${meta.name}-checkout=/builds/worker/checkouts/src'
                               - '--task-cwd=/builds/worker/checkouts/src'
                               - '--'
                               - bash
