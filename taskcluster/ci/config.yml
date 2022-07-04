@@ -35,12 +35,6 @@ taskgraph:
             default-repository: https://github.com/mozilla-mobile/android-components
             default-ref: main
             type: git
-        lockwise:
-            name: "Lockwise"
-            project-regex: lockwise-android
-            default-repository: https://github.com/mozilla-lockwise/lockwise-android
-            default-ref: master
-            type: git
         focusandroid:
             name: "Focus Android"
             project-regex: focus-android

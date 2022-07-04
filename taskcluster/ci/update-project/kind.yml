@@ -27,9 +27,6 @@ job-defaults:
         command: ['import-android-l10n', 'android-l10n/{project}/l10n.toml', '{project}']
 
 jobs:
-    mozilla-lockwise/lockwise-android:
-        repo-prefix: lockwise
-        pr-target: master
     mozilla-mobile/android-components:
         repo-prefix: ac
         pr-target: main
