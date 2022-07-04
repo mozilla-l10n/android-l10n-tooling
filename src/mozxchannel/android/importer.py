@@ -23,6 +23,12 @@ def main():
     subprocess.run(
         ["git", "-C", args.dest, "add", "-v", "-A"], check=True
     )
+    diff = subprocess.run(
+        ["git", "-C", args.dest, "diff", "--cached", "--exit-code"]
+    )
+    if diff.returncode == 0:
+        print("No changes")
+        return
     subprocess.run(
         ["git", "-C", args.dest, "commit", "-m", "Import l10n."], check=True
     )
