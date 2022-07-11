@@ -16,4 +16,11 @@ def create(target, target_branch, *, title, message, branch=None):
     env = os.environ.copy()
     env["EDITOR"] = "true"
     cmd = ["git", "-C", target, "pull-request", "--target-branch", target_branch, "--title", title, "--message", message]
-    subprocess.run(cmd, env=env, check=True)
+    try:
+        subprocess.run(cmd, env=env, check=True)
+    except subprocess.CalledProcessError as exc:
+        # Work around https://github.com/mozilla-l10n/android-l10n-tooling/issues/13
+        if exc.returncode == 50:
+            print("No changes found; exiting.")
+        else:
+            raise exc
