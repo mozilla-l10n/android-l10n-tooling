@@ -33,4 +33,5 @@ jobs:
         repo-prefix: fenix
     mozilla-mobile/focus-android:
         repo-prefix: focusandroid
-
+    mozilla-mobile/firefox-android:
+        repo-prefix: firefoxandroid

@@ -36,4 +36,6 @@ jobs:
     mozilla-mobile/focus-android:
         repo-prefix: focusandroid
         pr-target: main
-
+    mozilla-mobile/firefox-android:
+        repo-prefix: firefoxandroid
+        pr-target: ac-prep
