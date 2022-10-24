@@ -32,7 +32,6 @@ def main():
     subprocess.run(
         ["git", "-C", args.dest, "commit", "-m", "Import l10n."], check=True
     )
-
     if args.pull_request:
         pull_request.create(
             args.dest, args.pull_request, title="Import strings from android-l10n.", message="n/t"
@@ -42,8 +41,6 @@ def main():
 class Importer(object):
     def __init__(self, l10n_toml, dest):
         self.src_toml = l10n_toml
-        if dest == "mozilla-mobile/firefox-android" and "android-components" in l10n_toml:
-            dest = "mozilla-mobile/firefox-android/android-components"
         self.dest_toml = os.path.join(dest, 'l10n.toml')
         self.dest = dest
         self.src_config = self.dest_config = None

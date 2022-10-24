@@ -19,13 +19,14 @@ job-defaults:
         max-run-time: 3600
     pr-target: main
     l10n-toml-path: android-l10n/{project}/l10n.toml
+    destination-repo: '{project}'
     run:
         using: run-task
         cwd: '{checkout}'
         checkout:
             l10n:
                 path: android-l10n
-        command: ['import-android-l10n', '{l10n_toml_path}', '{project}']
+        command: ['import-android-l10n', '{l10n_toml_path}', '{destination_repo}']
 
 jobs:
     mozilla-mobile/android-components:
@@ -45,3 +46,4 @@ jobs:
         #
         # TODO: Support more than a single product
         l10n-toml-path: 'android-l10n/mozilla-mobile/android-components/l10n.toml'
+        destination-repo: 'mozilla-mobile/firefox-android/android-components'

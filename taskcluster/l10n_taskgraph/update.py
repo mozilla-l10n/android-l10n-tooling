@@ -38,6 +38,8 @@ def add_l10n_toml_path(config, jobs):
         repo_name = project.split("/", 1)[1]
         l10n_toml_path = job.pop("l10n-toml-path", "")
         l10n_toml_path = l10n_toml_path.format(project=project)
+        destination_repo = job.pop("destination-repo", "")
+        destination_repo = destination_repo.format(project=project)
 
         run = job.setdefault("run", {})
         run["command"] = [
@@ -45,6 +47,7 @@ def add_l10n_toml_path(config, jobs):
                 project=project,
                 repo_name=repo_name,
                 l10n_toml_path=l10n_toml_path,
+                destination_repo=destination_repo,
             ) for arg in run["command"]
         ]
 
