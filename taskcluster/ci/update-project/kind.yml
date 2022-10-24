@@ -48,4 +48,4 @@ jobs:
         # one subfolder per android product
         #
         # TODO: Support more than a single product
-        toml-path: 'android-l10n/{project}/android-components/l10n.toml'
+        toml-path: 'android-l10n/android-components/l10n.toml'
