@@ -306,10 +306,12 @@ class CommitWalker(walker.GraphWalker):
         self.ensureL10nToml(workdir)
 
     def ensureL10nToml(self, workdir):
-        includes = {
-            '{}/l10n.toml'.format(repo.target_root)
-            for repo in self.graph.repos
-        }
+        includes = set()
+        for repo in self.graph.repos:
+            # TODO Support focus-android and fenix
+            folder = "{}/android-component".format(repo.target_root) if "firefox-android" in repo.target_root else repo.target_root
+            includes.add("{}/l10n.toml".format(folder))
+
         includes = sorted(includes)
         with open(os.path.join(workdir, "l10n.toml"), "w") as l10n_toml:
             l10n_toml.write("basepath = \".\"\n")
