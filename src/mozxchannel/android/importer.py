@@ -17,8 +17,9 @@ def main():
     porter = Importer(args.l10n_toml, args.dest)
     porter.import_strings()
 
+    branch = "import-l10n"
     subprocess.run(
-        ["git", "-C", args.dest, "checkout", "-B", "import-l10n"], check=True
+        ["git", "-C", args.dest, "checkout", "-B", branch], check=True
     )
     subprocess.run(
         ["git", "-C", args.dest, "add", "-v", "-A"], check=True
@@ -32,6 +33,11 @@ def main():
     subprocess.run(
         ["git", "-C", args.dest, "commit", "-m", "Import l10n."], check=True
     )
+    with open("/builds/worker/artifacts/logs/outgoing.diff", "w") as f:
+        subprocess.run(
+            ["git", "-C", args.dest, "diff", f"origin/{branch}..{branch}"], check=True, stdout=f
+        )
+
     if args.pull_request:
         pull_request.create(
             args.dest, args.pull_request, title="Import strings from android-l10n.", message="n/t"
