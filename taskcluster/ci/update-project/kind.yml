@@ -18,14 +18,14 @@ job-defaults:
         docker-image: {in-tree: l10n}
         max-run-time: 3600
     pr-target: main
-    toml-path: android-l10n/{project}/l10n.toml
+    l10n-toml-path: android-l10n/{project}/l10n.toml
     run:
         using: run-task
         cwd: '{checkout}'
         checkout:
             l10n:
                 path: android-l10n
-        command: ['import-android-l10n', '{toml_path}', '{project}']
+        command: ['import-android-l10n', '{l10n_toml_path}', '{project}']
 
 jobs:
     mozilla-mobile/android-components:
@@ -44,4 +44,4 @@ jobs:
         # one subfolder per android product
         #
         # TODO: Support more than a single product
-        toml-path: 'android-l10n/mozilla-mobile/android-components/l10n.toml'
+        l10n-toml-path: 'android-l10n/mozilla-mobile/android-components/l10n.toml'

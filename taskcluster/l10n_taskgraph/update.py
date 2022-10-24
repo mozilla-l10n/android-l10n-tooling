@@ -32,19 +32,19 @@ def update_l10n(config, jobs):
 
 
 @transforms.add
-def add_toml_path(config, jobs):
+def add_l10n_toml_path(config, jobs):
     for job in jobs:
         project = job["name"]
         repo_name = project.split("/", 1)[1]
-        toml_path = job.pop("toml-path", "")
-        toml_path = toml_path.format(project=project)
+        l10n_toml_path = job.pop("l10n-toml-path", "")
+        l10n_toml_path = l10n_toml_path.format(project=project)
 
         run = job.setdefault("run", {})
         run["command"] = [
             arg.format(
                 project=project,
                 repo_name=repo_name,
-                toml_path=toml_path,
+                l10n_toml_path=l10n_toml_path,
             ) for arg in run["command"]
         ]
 
