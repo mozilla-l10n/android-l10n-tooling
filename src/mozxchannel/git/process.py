@@ -113,7 +113,7 @@ class CommitsGraph:
     def gather_repo(self, repo):
         basepath = repo.path
         # TODO: Support focus-android and fenix in the monorepo
-        basepath = basepath.replace("firefox-android", "android-components")
+        basepath = basepath.replace("firefox-android", "firefox-android/android-components")
         pc = TOMLParser().parse(mozpath.join(basepath, "l10n.toml"))
         self.paths_for_repos[repo.name] = paths = references(pc, basepath)
         branches = repo.branches()
