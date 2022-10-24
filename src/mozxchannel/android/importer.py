@@ -51,8 +51,6 @@ def main():
 class Importer(object):
     def __init__(self, l10n_toml, dest):
         self.src_toml = l10n_toml
-        if dest == "mozilla-mobile/firefox-android" and "android-components" in l10n_toml:
-            dest = "mozilla-mobile/android-components"
         self.dest_toml = os.path.join(dest, 'l10n.toml')
         self.dest = dest
         self.src_config = self.dest_config = None
