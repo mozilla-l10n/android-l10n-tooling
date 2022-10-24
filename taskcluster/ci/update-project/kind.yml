@@ -13,8 +13,8 @@ transforms:
 job-defaults:
     artifacts:
         - type: file
-            name: public/logs/outgoing.diff
-            path: /builds/worker/artifacts/logs/outgoing.diff
+          name: public/logs/outgoing.diff
+          path: /builds/worker/artifacts/logs/outgoing.diff
     attributes: {}
     description: "Update {project} with translations."
     worker-type: linux
