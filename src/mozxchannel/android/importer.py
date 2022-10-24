@@ -66,7 +66,7 @@ class Importer(object):
                         os.remove(file)
                 if not os.listdir(root):
                     os.removedirs(root)
-
+            
 
     def copy_toml(self):
         shutil.copy2(self.src_toml, self.dest_toml)
