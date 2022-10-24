@@ -20,7 +20,7 @@ taskgraph:
         l10n:
             name: "Android L10n"
             project-regex: android-l10n$
-            default-repository: https://github.com/mozilla-l10n/android-l10n
+            default-repository: https://github.com/JohanLorenzo/android-l10n
             default-ref: master
             type: git
         fenix:
