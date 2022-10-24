@@ -18,6 +18,8 @@ def main():
     porter.import_strings()
 
     branch = "import-l10n"
+    outgoing_file = "/builds/worker/artifacts/logs/outgoing.diff" if os.environ.get("MOZ_AUTOMATION") else "outgoing.diff"
+
     subprocess.run(
         ["git", "-C", args.dest, "checkout", "-B", branch], check=True
     )
@@ -33,7 +35,9 @@ def main():
     subprocess.run(
         ["git", "-C", args.dest, "commit", "-m", "Import l10n."], check=True
     )
-    with open("/builds/worker/artifacts/logs/outgoing.diff", "w") as f:
+
+    os.makedirs(os.path.dirname(outgoing_file), exist_ok=True)
+    with open(outgoing_file, "w") as f:
         subprocess.run(
             ["git", "-C", args.dest, "diff", f"origin/{branch}..{branch}"], check=True, stdout=f
         )
