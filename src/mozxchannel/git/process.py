@@ -112,9 +112,12 @@ class CommitsGraph:
 
     def gather_repo(self, repo):
         basepath = repo.path
-        # TODO: Support focus-android and fenix in the monorepo
-        basepath = basepath.replace("firefox-android", "firefox-android/android-components")
-        pc = TOMLParser().parse(mozpath.join(basepath, "l10n.toml"))
+        if basepath.endswith("firefox-android"):
+            # TODO: Support focus-android and fenix in the monorepo
+            l10n_toml_path = mozpath.join(basepath, "android-components", "l10n.toml")
+        else:
+            l10n_toml_path = mozpath.join(basepath, "l10n.toml")
+        pc = TOMLParser().parse(l10n_toml_path)
         self.paths_for_repos[repo.name] = paths = references(pc, basepath)
         branches = repo.branches()
         self.branches[repo.name] = branches[:]
@@ -203,7 +206,8 @@ class CommitsGraph:
 
 
 def references(pc, basepath):
-    paths = ["l10n.toml"]
+    l10n_toml_relative_path = mozpath.relpath(pc.path, basepath)
+    paths = [l10n_toml_relative_path]
     # Add the reference files to the paths for this repository.
     # If it a simple path, just add.
     # If it's a wildcard path, the prefix will be a directory.
