@@ -274,6 +274,7 @@ class CommitWalker(walker.GraphWalker):
                 for p in paths:
                     if p in other_commit.tree:
                         target_path = mozpath.join(other_repo.target_root, p)
+                        target_path = target_path.replace("/firefox-android/", "/")
                         contents[target_path].append(
                             other_repo[other_commit.tree[p].id].data
                         )
