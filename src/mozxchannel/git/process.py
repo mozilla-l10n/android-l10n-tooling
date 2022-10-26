@@ -315,7 +315,7 @@ class CommitWalker(walker.GraphWalker):
         includes = set()
         for repo in self.graph.repos:
             # TODO Support focus-android and fenix
-            folder = "{}/android-component".format(repo.target_root) if "firefox-android" in repo.target_root else repo.target_root
+            folder = "{}/android-components".format(repo.target_root) if "firefox-android" in repo.target_root else repo.target_root
             includes.add("{}/l10n.toml".format(folder))
 
         includes = sorted(includes)
