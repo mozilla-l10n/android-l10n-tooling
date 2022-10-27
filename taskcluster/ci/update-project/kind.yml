@@ -18,13 +18,15 @@ job-defaults:
         docker-image: {in-tree: l10n}
         max-run-time: 3600
     pr-target: main
+    l10n-toml-path: android-l10n/{project}/l10n.toml
+    destination-repo: '{project}'
     run:
         using: run-task
         cwd: '{checkout}'
         checkout:
             l10n:
                 path: android-l10n
-        command: ['import-android-l10n', 'android-l10n/{project}/l10n.toml', '{project}']
+        command: ['import-android-l10n', '{l10n_toml_path}', '{destination_repo}']
 
 jobs:
     mozilla-mobile/android-components:
@@ -36,4 +38,12 @@ jobs:
     mozilla-mobile/focus-android:
         repo-prefix: focusandroid
         pr-target: main
-
+    mozilla-mobile/firefox-android:
+        repo-prefix: firefoxandroid
+        pr-target: ac-prep  # TODO: Change to main once we migrated android-components over
+        # Note: Path to `l10n.toml` includes a subfolder because the monorepo will contain
+        # one subfolder per android product
+        #
+        # TODO: Support more than a single product
+        l10n-toml-path: 'android-l10n/mozilla-mobile/android-components/l10n.toml'
+        destination-repo: 'mozilla-mobile/firefox-android/android-components'

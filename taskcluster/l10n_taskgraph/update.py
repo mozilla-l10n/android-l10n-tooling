@@ -19,17 +19,36 @@ def update_l10n(config, jobs):
         project = job["name"]
         repo_prefix = job.pop("repo-prefix")
         pr_target = job.pop("pr-target")
-        repo_name = project.split("/", 1)[1]
 
         job["description"] = job["description"].format(project=project)
         run["checkout"][repo_prefix] = {"path": project}
-        run["command"] = [
-            arg.format(project=project, repo_name=repo_name) for arg in run["command"]
-        ]
         if config.params["level"] == "3":
             run["command"][1:1] = [f"--pull-request={pr_target}"]
             job.setdefault("scopes", []).append(f"secrets:get:{secret_name}")
             worker["taskcluster-proxy"] = True
             worker.setdefault("env", {})["GITHUB_TOKEN_SECRET_NAME"] = secret_name
+
+        yield job
+
+
+@transforms.add
+def add_l10n_toml_path(config, jobs):
+    for job in jobs:
+        project = job["name"]
+        repo_name = project.split("/", 1)[1]
+        l10n_toml_path = job.pop("l10n-toml-path", "")
+        l10n_toml_path = l10n_toml_path.format(project=project)
+        destination_repo = job.pop("destination-repo", "")
+        destination_repo = destination_repo.format(project=project)
+
+        run = job.setdefault("run", {})
+        run["command"] = [
+            arg.format(
+                project=project,
+                repo_name=repo_name,
+                l10n_toml_path=l10n_toml_path,
+                destination_repo=destination_repo,
+            ) for arg in run["command"]
+        ]
 
         yield job

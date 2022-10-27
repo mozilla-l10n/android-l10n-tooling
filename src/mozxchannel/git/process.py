@@ -112,7 +112,13 @@ class CommitsGraph:
 
     def gather_repo(self, repo):
         basepath = repo.path
-        pc = TOMLParser().parse(mozpath.join(basepath, "l10n.toml"))
+        # TODO Bug 1797507: Remove this hack at the same time the Pontoon DB gets migrated
+        if basepath.endswith("firefox-android"):
+            # TODO: Support focus-android and fenix in the monorepo
+            l10n_toml_path = mozpath.join(basepath, "android-components", "l10n.toml")
+        else:
+            l10n_toml_path = mozpath.join(basepath, "l10n.toml")
+        pc = TOMLParser().parse(l10n_toml_path)
         self.paths_for_repos[repo.name] = paths = references(pc, basepath)
         branches = repo.branches()
         self.branches[repo.name] = branches[:]
@@ -201,7 +207,8 @@ class CommitsGraph:
 
 
 def references(pc, basepath):
-    paths = ["l10n.toml"]
+    l10n_toml_relative_path = mozpath.relpath(pc.path, basepath)
+    paths = [l10n_toml_relative_path]
     # Add the reference files to the paths for this repository.
     # If it a simple path, just add.
     # If it's a wildcard path, the prefix will be a directory.
@@ -268,6 +275,9 @@ class CommitWalker(walker.GraphWalker):
                 for p in paths:
                     if p in other_commit.tree:
                         target_path = mozpath.join(other_repo.target_root, p)
+                        # The following line is for the monorepo to sync on top of existing files
+                        # TODO Bug 1797507: Remove this workaround at the same time the Pontoon DB gets migrated
+                        target_path = target_path.replace("/firefox-android/", "/")
                         contents[target_path].append(
                             other_repo[other_commit.tree[p].id].data
                         )
@@ -304,10 +314,13 @@ class CommitWalker(walker.GraphWalker):
         self.ensureL10nToml(workdir)
 
     def ensureL10nToml(self, workdir):
-        includes = {
-            '{}/l10n.toml'.format(repo.target_root)
-            for repo in self.graph.repos
-        }
+        includes = set()
+        for repo in self.graph.repos:
+            # TODO Bug 1797507: Remove this workaround at the same time the Pontoon DB gets migrated
+            # TODO Support focus-android and fenix
+            folder = "{}/android-components".format(repo.target_root) if "firefox-android" in repo.target_root else repo.target_root
+            includes.add("{}/l10n.toml".format(folder))
+
         includes = sorted(includes)
         with open(os.path.join(workdir, "l10n.toml"), "w") as l10n_toml:
             l10n_toml.write("basepath = \".\"\n")
