@@ -40,7 +40,7 @@ jobs:
         pr-target: main
     mozilla-mobile/firefox-android:
         repo-prefix: firefoxandroid
-        pr-target: ac-prep  # TODO: Change to main once we migrated android-components over
+        pr-target: main
         # Note: Path to `l10n.toml` includes a subfolder because the monorepo will contain
         # one subfolder per android product
         #

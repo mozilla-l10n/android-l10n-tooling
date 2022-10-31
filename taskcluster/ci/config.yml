@@ -45,7 +45,7 @@ taskgraph:
             name: "Firefox Android"
             project-regex: firefox-android
             default-repository: https://github.com/mozilla-mobile/firefox-android
-            default-ref: ac-prep
+            default-ref: main
             type: git
     cached-task-prefix: l10n.android-l10n-tooling
 
