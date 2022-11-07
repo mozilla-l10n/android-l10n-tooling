@@ -55,9 +55,9 @@ workers:
             provisioner: 'l10n-{level}'
             implementation: docker-worker
             os: linux
-            worker-type: 'linux'
+            worker-type: 'linux-gcp'
         images:
             provisioner: 'l10n-{level}'
             implementation: docker-worker
             os: linux
-            worker-type: 'images'
+            worker-type: 'images-gcp'
