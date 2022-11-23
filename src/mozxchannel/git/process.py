@@ -17,8 +17,8 @@ from mozxchannel.git.repository import (
 from mozxchannel.git import pull_request
 
 
-def handle(target, target_branch, repos_to_iterate, pull=False):
-    graph = CommitsGraph(target, target_branch, repos_to_iterate)
+def handle(target, target_branch, repos_to_iterate, project, pull=False):
+    graph = CommitsGraph(target, target_branch, repos_to_iterate, project)
     graph.loadConfigs()
     if pull:
         graph.pull()
@@ -28,7 +28,7 @@ def handle(target, target_branch, repos_to_iterate, pull=False):
 
 
 class CommitsGraph:
-    def __init__(self, target, branch, repos_to_iterate, source=None):
+    def __init__(self, target, branch, repos_to_iterate, project="", source=None):
         self.config = None
         self.repos = None
         self.source = source
@@ -45,6 +45,7 @@ class CommitsGraph:
         self.repos_to_iterate = repos_to_iterate
         self.repos_to_pull = None
         self.revs = {}
+        self.project = project
 
     def loadRevs(self):
         revs = self.target.converted_revs()
@@ -114,8 +115,7 @@ class CommitsGraph:
         basepath = repo.path
         # TODO Bug 1797507: Remove this hack at the same time the Pontoon DB gets migrated
         if basepath.endswith("firefox-android"):
-            # TODO: Support focus-android and fenix in the monorepo
-            l10n_toml_path = mozpath.join(basepath, "android-components", "l10n.toml")
+            l10n_toml_path = mozpath.join(basepath, self.project, "l10n.toml")
         else:
             l10n_toml_path = mozpath.join(basepath, "l10n.toml")
         pc = TOMLParser().parse(l10n_toml_path)
@@ -230,12 +230,13 @@ def references(pc, basepath):
 
 
 class CommitWalker(walker.GraphWalker):
-    def __init__(self, graph, branch):
+    def __init__(self, graph, branch, project):
         super(CommitWalker, self).__init__(graph)
         self.revs = {}
         for repo_name, revs in graph.revs.items():
             self.revs[repo_name] = revs.copy()
         self.target_branch = branch
+        self.project = project
 
     def repo(self, name):
         for repo in self.graph.repos:
@@ -317,8 +318,7 @@ class CommitWalker(walker.GraphWalker):
         includes = set()
         for repo in self.graph.repos:
             # TODO Bug 1797507: Remove this workaround at the same time the Pontoon DB gets migrated
-            # TODO Support focus-android and fenix
-            folder = "{}/android-components".format(repo.target_root) if "firefox-android" in repo.target_root else repo.target_root
+            folder = "{}/{}".format(repo.target_root, self.project) if "firefox-android" in repo.target_root else repo.target_root
             includes.add("{}/l10n.toml".format(folder))
 
         includes = sorted(includes)
@@ -351,8 +351,26 @@ def main():
     p.add_argument("target")
     p.add_argument("--branch", default="master")
     args = p.parse_args()
-    graph = handle(args.target, args.branch, args.repo, pull=args.pull)
-    echo = CommitWalker(graph, args.branch)
+
+    repos_to_iterate = args.repo
+    project = ""
+
+    # Hack: Parse the --repo argument to get the project which will be used as the relpath
+    # to the toml file for the monorepo. Also, generate the correct repo path for
+    # repos_to_iterate.
+    if repos_to_iterate is not None and any(
+        "firefox-android" in repo for repo in args.repo
+    ):
+        repos_to_iterate = []
+        for repo in args.repo:
+            if "firefox-android" in repo:
+                org_name, repo_name, project = repo.split("/")
+                repos_to_iterate.append("{}/{}".format(org_name, repo_name))
+            else:
+                repos_to_iterate.append(repo)
+
+    graph = handle(args.target, args.branch, repos_to_iterate, project, pull=args.pull)
+    echo = CommitWalker(graph, args.branch, project)
     echo.walkGraph()
     if args.pull_request:
         title = "Import {} quarantine.".format(", ".join(args.repo))

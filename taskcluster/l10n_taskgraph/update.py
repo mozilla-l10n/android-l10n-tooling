@@ -21,6 +21,11 @@ def update_l10n(config, jobs):
         pr_target = job.pop("pr-target")
 
         job["description"] = job["description"].format(project=project)
+
+        if "firefox-android" in project:
+            org_name, repo_name, project = project.split("/")
+            project = "{}/{}".format(org_name, repo_name)
+
         run["checkout"][repo_prefix] = {"path": project}
         if config.params["level"] == "3":
             run["command"][1:1] = [f"--pull-request={pr_target}"]
@@ -35,11 +40,9 @@ def update_l10n(config, jobs):
 def add_l10n_toml_path(config, jobs):
     for job in jobs:
         project = job["name"]
-        repo_name = project.split("/", 1)[1]
+        repo_name = project.split("/")[1]
         l10n_toml_path = job.pop("l10n-toml-path", "")
         l10n_toml_path = l10n_toml_path.format(project=project)
-        destination_repo = job.pop("destination-repo", "")
-        destination_repo = destination_repo.format(project=project)
 
         run = job.setdefault("run", {})
         run["command"] = [
@@ -47,7 +50,6 @@ def add_l10n_toml_path(config, jobs):
                 project=project,
                 repo_name=repo_name,
                 l10n_toml_path=l10n_toml_path,
-                destination_repo=destination_repo,
             ) for arg in run["command"]
         ]
 
