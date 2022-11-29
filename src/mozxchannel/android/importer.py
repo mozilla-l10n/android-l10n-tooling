@@ -17,6 +17,11 @@ def main():
     porter = Importer(args.l10n_toml, args.dest)
     porter.import_strings()
 
+    # Not sure if creating and resetting the same "import-l10n" branch would cause issues
+    # when importing strings from Focus and AC in the monorepo.
+    # eg, Would this overwrite changes from a prior job if there are changes coming from
+    # both Focus and AC?
+    # Easy fix would be to append the args.dest to the branch name.
     subprocess.run(
         ["git", "-C", args.dest, "checkout", "-B", "import-l10n"], check=True
     )
