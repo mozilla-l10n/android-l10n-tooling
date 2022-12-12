@@ -47,12 +47,6 @@ taskgraph:
             default-repository: https://github.com/mozilla-mobile/firefox-android
             default-ref: main
             type: git
-        firefoxandroidfocus: # TODO: Remove after we move focus-android into the monorepo.
-            name: "Firefox Android"
-            project-regex: firefox-android
-            default-repository: https://github.com/mozilla-mobile/firefox-android
-            default-ref: focus-prep
-            type: git
     cached-task-prefix: l10n.android-l10n-tooling
 
 workers:

@@ -30,18 +30,13 @@ job-defaults:
 jobs:
     mozilla-mobile/android-components:
         repo-prefix: ac
-        pr-target: main
     mozilla-mobile/fenix:
         repo-prefix: fenix
-        pr-target: main
     mozilla-mobile/focus-android:
         repo-prefix: focusandroid
-        pr-target: main
     mozilla-mobile/firefox-android/android-components:
         repo-prefix: firefoxandroid
-        pr-target: main
         l10n-toml-path: 'android-l10n/mozilla-mobile/android-components/l10n.toml'
     mozilla-mobile/firefox-android/focus-android:
-        repo-prefix: firefoxandroidfocus # TODO: Change to firefoxandroid after moving focus-android into the monorepo.
-        pr-target: focus-prep # TODO: Change to main once we migrated focus-android over
+        repo-prefix: firefoxandroid
         l10n-toml-path: 'android-l10n/mozilla-mobile/focus-android/l10n.toml'
