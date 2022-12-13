@@ -40,7 +40,11 @@ def update_l10n(config, jobs):
 def add_l10n_toml_path(config, jobs):
     for job in jobs:
         project = job["name"]
+
         repo_name = project.split("/")[1]
+        if "firefox-android" in project:
+            repo_name = "{}-{}".format(repo_name, project.split("/")[2])
+
         l10n_toml_path = job.pop("l10n-toml-path", "")
         l10n_toml_path = l10n_toml_path.format(project=project)
 
