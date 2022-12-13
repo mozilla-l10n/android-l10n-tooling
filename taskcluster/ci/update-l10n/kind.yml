@@ -36,4 +36,4 @@ jobs:
     mozilla-mobile/firefox-android/android-components:
         repo-prefix: firefoxandroid
     mozilla-mobile/firefox-android/focus-android:
-        repo-prefix: firefoxandroidfocus # TODO: Change to firefoxandroid after moving focus-android into the monorepo.
+        repo-prefix: firefoxandroid
