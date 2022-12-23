@@ -345,8 +345,8 @@ class CommitWalker(walker.GraphWalker):
         name = repo.name
         filename = name.replace('/', '-')
         if "firefox-android" in filename:
-            filename = f"{self.filename}-{self.project}"
-            name = f"{self.name}/{self.project}"
+            filename = f"{filename}-{self.project}"
+            name = f"{name}/{self.project}"
 
         metafile = os.path.join(workdir, f'{filename}.json')
         meta = {
