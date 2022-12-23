@@ -51,6 +51,8 @@ class CommitsGraph:
         revs = self.target.converted_revs()
         for repo in self.repos:
             repo_name = repo.name
+            if "firefox-android" in repo_name:
+                repo_name = f"{repo_name}/{self.project}"
             self.revs[repo_name] = {}
             if repo_name not in revs:
                 continue
@@ -246,7 +248,9 @@ class CommitWalker(walker.GraphWalker):
     def handlerev(self, src_rev):
         repo_name, branch = self.graph.repos_for_hash[src_rev][0]
         repo = self.repo(repo_name)
-        self.revs[repo.name][branch] = src_rev
+        if "firefox-android" in repo_name:
+            repo_name = f"{repo_name}/{self.project}"
+        self.revs[repo_name][branch] = src_rev
         if src_rev in self.graph.forks:
             for fork_repo, fork_branch, fork_rev in self.graph.forks[src_rev]:
                 if fork_branch not in self.revs[fork_repo]:
@@ -255,7 +259,10 @@ class CommitWalker(walker.GraphWalker):
         message = commitish.message + "\n"
         contents = defaultdict(list)
         for other_repo in self.graph.repos:
-            other_revs = self.revs[other_repo.name]
+            other_repo_name = other_repo.name
+            if "firefox-android" in other_repo_name:
+                other_repo_name = f"{other_repo_name}/{self.project}"
+            other_revs = self.revs[other_repo_name]
             paths = self.graph.paths_for_repos.get(other_repo.name)
             other_branches = self.graph.branches.get(other_repo.name, other_revs.keys())
             for other_branch in other_branches:
@@ -283,7 +290,7 @@ class CommitWalker(walker.GraphWalker):
                             other_repo[other_commit.tree[p].id].data
                         )
         self.createWorkdir(contents)
-        self.createMeta(repo, self.revs[repo.name])
+        self.createMeta(repo, self.revs[repo_name])
         self.graph.target.git.index.add_all()
         self.graph.target.git.index.write()
         tree_id = self.graph.target.git.index.write_tree()
@@ -334,9 +341,16 @@ class CommitWalker(walker.GraphWalker):
         workdir = os.path.join(self.graph.target.git.workdir, '_meta')
         if not os.path.isdir(workdir):
             os.makedirs(workdir)
-        metafile = os.path.join(workdir, repo.name.replace('/', '-') + '.json')
+
+        name = repo.name
+        filename = name.replace('/', '-')
+        if "firefox-android" in filename:
+            filename = f"{self.filename}-{self.project}"
+            name = f"{self.name}/{self.project}"
+
+        metafile = os.path.join(workdir, f'{filename}.json')
         meta = {
-            "name": repo.name,
+            "name": name,
             "revs": revs
         }
         with open(metafile, 'w') as fh:
