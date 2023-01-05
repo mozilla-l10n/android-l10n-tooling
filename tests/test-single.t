@@ -24,11 +24,6 @@ Create upstream repo, with a single commit for a l10n.toml and a strings.xml
   $ cd android1
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml action_cancel=Cancel
   $ $TESTDIR/l10n-toml --locales de he sr-Cyrl
-  $ compare-locales --validate l10n.toml .
-  en-x-moz-reference:
-  unchanged         1
-  unchanged_w       1
-  0% of entries changed
   $ git add .
   $ git commit -qm'c0'
   $ git log -n1 --format='%H'
@@ -200,45 +195,3 @@ Validate batched results
   X-Channel-Converted-Revision: [master] gh1/android1@a5643d6afc7bad7e741991d4fcc935146ee27e72
   
   aafc5e0cb34ba3c6c5fc70f001f60e8320a1c153 Initial config
-  
-Run compare-locales on the output
-  $ compare-locales target/l10n.toml target
-  gh1/android1/app/src/main/res
-    values-b+sr+Cyrl/strings.xml
-        // add and localize this file
-    values-de/strings.xml
-        // add and localize this file
-    values-iw/strings.xml
-        // add and localize this file
-  de:
-  missing           4
-  missing_w         5
-  0% of entries changed
-  he:
-  missing           4
-  missing_w         5
-  0% of entries changed
-  sr-Cyrl:
-  missing           4
-  missing_w         5
-  0% of entries changed
-  $ compare-locales batched-target/l10n.toml batched-target
-  gh1/android1/app/src/main/res
-    values-b+sr+Cyrl/strings.xml
-        // add and localize this file
-    values-de/strings.xml
-        // add and localize this file
-    values-iw/strings.xml
-        // add and localize this file
-  de:
-  missing           4
-  missing_w         5
-  0% of entries changed
-  he:
-  missing           4
-  missing_w         5
-  0% of entries changed
-  sr-Cyrl:
-  missing           4
-  missing_w         5
-  0% of entries changed

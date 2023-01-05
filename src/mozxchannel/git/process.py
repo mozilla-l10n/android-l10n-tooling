@@ -319,23 +319,6 @@ class CommitWalker(walker.GraphWalker):
                 os.makedirs(tdir)
             with open(tpath, "wb") as fh:
                 fh.write(b_content)
-        self.ensureL10nToml(workdir)
-
-    def ensureL10nToml(self, workdir):
-        includes = set()
-        for repo in self.graph.repos:
-            # TODO Bug 1797507: Remove this workaround at the same time the Pontoon DB gets migrated
-            folder = "{}/{}".format(repo.target_root, self.project) if "firefox-android" in repo.target_root else repo.target_root
-            includes.add("{}/l10n.toml".format(folder))
-
-        includes = sorted(includes)
-        with open(os.path.join(workdir, "l10n.toml"), "w") as l10n_toml:
-            l10n_toml.write("basepath = \".\"\n")
-            for include in includes:
-                l10n_toml.write("""
-[[includes]]
-    path = "{}"
-""".format(include))
 
     def createMeta(self, repo, revs):
         workdir = os.path.join(self.graph.target.git.workdir, '_meta')

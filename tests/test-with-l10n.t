@@ -24,11 +24,6 @@ Start creating the original repository and it's conversion.
   $ cd android1
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml action_cancel=Cancel
   $ $TESTDIR/l10n-toml --locales de he sr-Cyrl
-  $ compare-locales --validate l10n.toml .
-  en-x-moz-reference:
-  unchanged         1
-  unchanged_w       1
-  0% of entries changed
   $ git add .
   $ git commit -qm'a1-c0'
   $ git log -n1 --format='%H'
@@ -80,11 +75,6 @@ Create a fork of the project, create independent new strings in each.
   $ cd android2
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml action_cancel=Cancel action_more=More
   $ $TESTDIR/l10n-toml --locales de he sr-Cyrl
-  $ compare-locales --validate l10n.toml .
-  en-x-moz-reference:
-  unchanged         2
-  unchanged_w       2
-  0% of entries changed
   $ git add .
   $ git commit -qm'a2-c0'
   $ git log -n1 --format='%H'
@@ -140,18 +130,3 @@ Check the resulting graph
   |   
   * add android1
     
-  $ compare-locales -qq l10n.toml .
-  de:
-  missing           1
-  missing_w         1
-  changed           2
-  changed_w         2
-  66% of entries changed
-  he:
-  missing           3
-  missing_w         3
-  0% of entries changed
-  sr-Cyrl:
-  missing           3
-  missing_w         3
-  0% of entries changed

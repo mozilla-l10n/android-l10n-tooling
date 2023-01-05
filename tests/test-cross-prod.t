@@ -25,11 +25,6 @@ Start creating the original repository and it's conversion.
   $ cd android1
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml action_cancel=Cancel
   $ $TESTDIR/l10n-toml --locales de he sr-Cyrl
-  $ compare-locales --validate l10n.toml .
-  en-x-moz-reference:
-  unchanged         1
-  unchanged_w       1
-  0% of entries changed
   $ git add .
   $ git commit -qm'c0'
   $ git log -n1 --format='%H'
@@ -111,11 +106,6 @@ Add independent project
   $ cd single-android
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml action_ok=OK
   $ $TESTDIR/l10n-toml --locales de fr zh-TW
-  $ compare-locales --validate l10n.toml .
-  en-x-moz-reference:
-  unchanged         1
-  unchanged_w       1
-  0% of entries changed
   $ git add .
   $ git commit -qm'c0'
   $ git log -n1 --format='%H'
@@ -150,24 +140,3 @@ Validate some of the results
   
   72bc0112d0616f59d3d79fd76a932fe8bb3ea315 Add single-android
   
-  $ compare-locales -qq l10n.toml .
-  de:
-  missing           4
-  missing_w         4
-  0% of entries changed
-  fr:
-  missing           1
-  missing_w         1
-  0% of entries changed
-  he:
-  missing           3
-  missing_w         3
-  0% of entries changed
-  sr-Cyrl:
-  missing           3
-  missing_w         3
-  0% of entries changed
-  zh-TW:
-  missing           1
-  missing_w         1
-  0% of entries changed

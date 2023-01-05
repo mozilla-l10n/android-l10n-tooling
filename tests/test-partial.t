@@ -29,11 +29,6 @@ Create one upstream repo, with a single commit for a l10n.toml and a strings.xml
   $ cd android1
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml action_cancel=Cancel
   $ $TESTDIR/l10n-toml --locales de he sr-Cyrl
-  $ compare-locales --validate l10n.toml .
-  en-x-moz-reference:
-  unchanged         1
-  unchanged_w       1
-  0% of entries changed
   $ git add .
   $ git commit -qm'c0'
   $ git log -n1 --format='%H'
@@ -64,11 +59,6 @@ Destroy local clones,
   $ cd android2
   $ $TESTDIR/strings-xml app/src/main/res/values/strings.xml action_confirm=Confirm
   $ $TESTDIR/l10n-toml --locales fr
-  $ compare-locales --validate l10n.toml .
-  en-x-moz-reference:
-  unchanged         1
-  unchanged_w       1
-  0% of entries changed
   $ git add .
   $ git commit -qm'c0'
   $ git log -n1 --format='%H'
