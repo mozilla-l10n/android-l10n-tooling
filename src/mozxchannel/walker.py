@@ -8,6 +8,9 @@ class GraphWalker(object):
         self.graph = graph
 
     def walkGraph(self):
+        print("walkGraph")
+        print("--------------------------------------")
+
         self.visited = set()
         self.waiting = set()
         self.queue = self.graph.roots[:]

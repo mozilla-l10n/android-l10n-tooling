@@ -47,12 +47,27 @@ class CommitsGraph:
         self.revs = {}
         self.project = project
 
+        # print("self.project")
+        # print(self.project)
+        print("self.repos_to_iterate")
+        print(self.repos_to_iterate)
+
     def loadRevs(self):
+        print("loadRevs")
+        print("--------------------------------------")
+
         revs = self.target.converted_revs()
         for repo in self.repos:
+            # print("repo.name")
+            # print(repo.name)
+
             repo_name = repo.name
             if "firefox-android" in repo_name:
                 repo_name = f"{repo_name}/{self.project}"
+
+            # print("repo_name")
+            # print(repo_name)
+
             self.revs[repo_name] = {}
             if repo_name not in revs:
                 continue
@@ -66,6 +81,9 @@ class CommitsGraph:
                 if branch in revs[repo_name]:
                     self.revs[repo_name][branch] = revs[repo_name][branch]
 
+        print("self.revs")
+        print(self.revs)
+
     @property
     def roots(self):
         roots = list(set(self.children) - set(self.parents))
@@ -76,12 +94,18 @@ class CommitsGraph:
         return roots
 
     def loadConfigs(self):
+        print("loadConfigs")
+        print("--------------------------------------")
+
         config_path = os.path.join(self.target.git.workdir, "config.toml")
         repo_configs = toml.load(open(config_path))["repo"]
         self.repos = [
             SourceRepository(config, root=self.source)
             for config in repo_configs
         ]
+
+        print(self.repos)
+
         if not self.repos_to_iterate:
             self.repos_to_pull = self.repos
             return
@@ -95,10 +119,16 @@ class CommitsGraph:
         ]
 
     def pull(self):
+        print("pull")
+        print("--------------------------------------")
+
         for repo in self.repos_to_pull:
             repo.pull()
 
     def gather(self):
+        print("gather")
+        print("--------------------------------------")
+
         for repo in self.repos:
             if not (
                 self.repos_to_iterate
@@ -114,12 +144,19 @@ class CommitsGraph:
                     self.parents[child].remove(commit)
 
     def gather_repo(self, repo):
+        print(f"gather_repo - {repo.name}")
+        print("--------------------------------------")
+
         basepath = repo.path
         # TODO Bug 1797507: Remove this hack at the same time the Pontoon DB gets migrated
         if basepath.endswith("firefox-android"):
             l10n_toml_path = mozpath.join(basepath, self.project, "l10n.toml")
         else:
             l10n_toml_path = mozpath.join(basepath, "l10n.toml")
+
+        print("l10n_toml_path")
+        print(l10n_toml_path)
+
         pc = TOMLParser().parse(l10n_toml_path)
         self.paths_for_repos[repo.name] = paths = references(pc, basepath)
         branches = repo.branches()
@@ -129,6 +166,9 @@ class CommitsGraph:
         if "firefox-android" in repo_name:
             repo_name = f"{repo_name}/{self.project}"
         known_revs = self.revs.get(repo_name, {})
+
+        print("known_revs")
+        print(known_revs)
 
         for branch_num in range(len(branches)):
             branch = branches[branch_num]
@@ -214,8 +254,19 @@ class CommitsGraph:
 
 
 def references(pc, basepath):
+    print("references")
+    print("-----------------")
+
     l10n_toml_relative_path = mozpath.relpath(pc.path, basepath)
     paths = [l10n_toml_relative_path]
+
+    # print("l10n_toml_relative_path")
+    # print(l10n_toml_relative_path)
+    # print("pc.path")
+    # print(pc.path)
+    print("pc.paths")
+    print(pc.paths)
+
     # Add the reference files to the paths for this repository.
     # If it a simple path, just add.
     # If it's a wildcard path, the prefix will be a directory.
@@ -233,6 +284,10 @@ def references(pc, basepath):
                 root,
                 basepath
             ))
+
+    print("paths")
+    print(paths)
+
     return paths
 
 
@@ -252,10 +307,25 @@ class CommitWalker(walker.GraphWalker):
 
     def handlerev(self, src_rev):
         repo_name, branch = self.graph.repos_for_hash[src_rev][0]
+
+        print("handlerev")
+        print("src_rev")
+        print(src_rev)
+        print("repo_name")
+        print(repo_name)
+        print("branch")
+        print(branch)
+
         repo = self.repo(repo_name)
         if "firefox-android" in repo_name:
             repo_name = f"{repo_name}/{self.project}"
         self.revs[repo_name][branch] = src_rev
+
+        print("repo")
+        print(repo)
+        print("self.revs")
+        print(self.revs)
+
         if src_rev in self.graph.forks:
             for fork_repo, fork_branch, fork_rev in self.graph.forks[src_rev]:
                 if fork_branch not in self.revs[fork_repo]:
@@ -263,13 +333,46 @@ class CommitWalker(walker.GraphWalker):
         commitish = repo[src_rev]
         message = commitish.message + "\n"
         contents = defaultdict(list)
+
+        print("self.graph.repos")
+        print(self.graph.repos)
+        print("self.revs")
+        print(self.revs)
+        print("self.graph.paths_for_repos")
+        print(self.graph.paths_for_repos)
+
         for other_repo in self.graph.repos:
+            print("other_repo")
+            print(other_repo)
+            print("other_repo.name")
+            print(other_repo.name)
+
             other_repo_name = other_repo.name
+
+            print("other_repo_name")
+            print(other_repo_name)
+
             if "firefox-android" in other_repo_name:
                 other_repo_name = f"{other_repo_name}/{self.project}"
             other_revs = self.revs[other_repo_name]
+
+            print("other_revs")
+            print(other_revs)
+            print("other_revs.keys()")
+            print(other_revs.keys())
+
             paths = self.graph.paths_for_repos.get(other_repo.name)
+
+            print("paths_for_repos")
+            print(self.graph.paths_for_repos)
+            print("paths")
+            print(paths)
+
             other_branches = self.graph.branches.get(other_repo.name, other_revs.keys())
+
+            print("other_branches")
+            print(other_branches)
+
             for other_branch in other_branches:
                 if other_branch not in other_revs:
                     continue
@@ -295,6 +398,16 @@ class CommitWalker(walker.GraphWalker):
                             other_repo[other_commit.tree[p].id].data
                         )
         self.createWorkdir(contents)
+
+        print("self.createMeta(repo, self.revs[repo_name])")
+        print("repo")
+        print(repo)
+        print(repo.name)
+        print("self.revs")
+        print(self.revs)
+        print("repo_name")
+        print(repo_name)
+
         self.createMeta(repo, self.revs[repo_name])
         self.graph.target.git.index.add_all()
         self.graph.target.git.index.write()
@@ -353,6 +466,12 @@ class CommitWalker(walker.GraphWalker):
             filename = f"{filename}-{self.project}"
             name = f"{name}/{self.project}"
 
+        print("createMeta")
+        print("filename")
+        print(filename)
+        print("name")
+        print(name)
+
         metafile = os.path.join(workdir, f'{filename}.json')
         meta = {
             "name": name,
@@ -360,6 +479,9 @@ class CommitWalker(walker.GraphWalker):
         }
         with open(metafile, 'w') as fh:
             json.dump(meta, fh, sort_keys=True, indent=2)
+
+            print("meta")
+            print(meta)
 
 
 def main():

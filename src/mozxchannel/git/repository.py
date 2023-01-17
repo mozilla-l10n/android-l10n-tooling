@@ -105,19 +105,48 @@ class TargetRepository(Repository):
         self.checkout(branch)
 
     def converted_revs(self):
+        print("converted_revs: Go into android-l10n _meta directory and load all the json data.")
+
         branch = self.git.lookup_branch(self.target_branch).target
         tree = self[branch].tree
         if '_meta' not in tree:
             return {}
+
+        # print("converted_revs - tree['_meta']")
+        # print(tree['_meta'])
+        # print(tree['_meta'].id)
+
         tree = self[tree['_meta'].id]
+
+        # print("converted_revs - tree")
+        # print(tree)
+
         revs = {}
         for treeitem in tree:
             data = json.loads(self[treeitem.id].data)
+
+            # print(data)
+
             revs[data['name']] = data['revs']
+
+        print("converted_revs - revs:")
+        print(revs)
+
         return revs
 
     def known_revs(self):
+        print("known_revs")
+        print("--------------------------------------")
+
         revs = set()
         for branch_revs in self.converted_revs().values():
+            print("known_revs - branch_revs")
+            print(branch_revs)
+            print("known_revs - branch_revs.values()")
+            print(branch_revs.values())
+
             revs.update(branch_revs.values())
+
+        print(revs)
+
         return revs
