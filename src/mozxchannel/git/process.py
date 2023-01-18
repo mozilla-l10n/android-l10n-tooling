@@ -124,7 +124,12 @@ class CommitsGraph:
         self.paths_for_repos[repo.name] = paths = references(pc, basepath)
         branches = repo.branches()
         self.branches[repo.name] = branches[:]
-        known_revs = self.revs.get(repo.name, {})
+
+        repo_name = repo.name
+        if "firefox-android" in repo_name:
+            repo_name = f"{repo_name}/{self.project}"
+        known_revs = self.revs.get(repo_name, {})
+
         for branch_num in range(len(branches)):
             branch = branches[branch_num]
             prior_branches = branches[:branch_num]
