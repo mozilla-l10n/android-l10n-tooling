@@ -26,14 +26,4 @@ job-defaults:
                 path: android-l10n
         command: ['create-l10n-branch', '--repo', '{project}', '--branch', '{repo_name}-quarantine', 'android-l10n']
 
-jobs:
-    mozilla-mobile/android-components:
-        repo-prefix: ac
-    mozilla-mobile/fenix:
-        repo-prefix: fenix
-    mozilla-mobile/focus-android:
-        repo-prefix: focusandroid
-    mozilla-mobile/firefox-android/android-components:
-        repo-prefix: firefoxandroid
-    mozilla-mobile/firefox-android/focus-android:
-        repo-prefix: firefoxandroid
+jobs: {}
