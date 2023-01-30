@@ -28,15 +28,5 @@ job-defaults:
         command: ['import-android-l10n', '{l10n_toml_path}', '{project}']
 
 jobs:
-    mozilla-mobile/android-components:
-        repo-prefix: ac
     mozilla-mobile/fenix:
         repo-prefix: fenix
-    mozilla-mobile/focus-android:
-        repo-prefix: focusandroid
-    mozilla-mobile/firefox-android/android-components:
-        repo-prefix: firefoxandroid
-        l10n-toml-path: 'android-l10n/mozilla-mobile/android-components/l10n.toml'
-    mozilla-mobile/firefox-android/focus-android:
-        repo-prefix: firefoxandroid
-        l10n-toml-path: 'android-l10n/mozilla-mobile/focus-android/l10n.toml'
