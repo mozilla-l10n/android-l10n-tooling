@@ -3,11 +3,4 @@
 # `taskcluster/docs/cron.rst`.
 ---
 
-jobs:
-    - name: update-projects
-      job:
-          type: decision-task
-          treeherder-symbol: upd-proj
-          target-tasks-method: update-projects
-      when:
-          - {hour: 0, minute: 0}
+jobs: {}
