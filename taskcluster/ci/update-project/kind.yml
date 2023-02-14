@@ -27,6 +27,4 @@ job-defaults:
                 path: android-l10n
         command: ['import-android-l10n', '{l10n_toml_path}', '{project}']
 
-jobs:
-    mozilla-mobile/fenix:
-        repo-prefix: fenix
+jobs: {}
